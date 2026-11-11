@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_hub_gradient"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Prayer Times Settings\n(إعدادات مواقيت الصلاة)"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Layout Mode -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Layout Mode / تخطيط الويدجت" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_layout_mode" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <!-- Background Type -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Background / الخلفية" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_bg_type" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <!-- Highlight Color -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Highlight Color / تمييز الصلاة القادمة" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_highlight_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <!-- Text Color -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Base Text Color / لون الخط الأساسي" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_text_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <!-- Text Size -->
+        <TextView android:id="@+id/lbl_prayer_text_size" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Prayer Text Size / حجم نص الأوقات" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_prayer_text_size" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <!-- Time Color -->
+        <TextView android:id="@+id/lbl_prayer_time_color" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Prayer Times Color / لون أوقات الصلوات" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_prayer_time_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="24dp"/>
+
+        <!-- Switches -->
+        <androidx.appcompat.widget.SwitchCompat 
+            android:id="@+id/switch_show_clock" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:text="Show Current Clock / عرض الساعة الحالية" 
+            android:textColor="#FFFFFF" 
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Widget Language -->
+        <TextView 
+            android:id="@+id/lbl_widget_lang"
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:text="Widget Language / لغة الويدجت" 
+            android:textColor="#BBBBBB" 
+            android:textSize="14sp" 
+            android:layout_marginBottom="4dp"/>
+        <Spinner 
+            android:id="@+id/spinner_widget_lang" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" android:minHeight="50dp" 
+            android:background="@drawable/bg_spinner_dark" 
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Calculation Method -->
+        <TextView 
+            android:id="@+id/lbl_calc_method"
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:text="Calculation Method / طريقة الحساب" 
+            android:textColor="#BBBBBB" 
+            android:textSize="14sp" 
+            android:layout_marginBottom="4dp"/>
+        <Spinner 
+            android:id="@+id/spinner_calc_method" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" android:minHeight="50dp" 
+            android:background="@drawable/bg_spinner_dark" 
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Asr Juristic -->
+        <TextView 
+            android:id="@+id/lbl_asr_juristic"
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:text="Asr Madhab / مذهب العصر" 
+            android:textColor="#BBBBBB" 
+            android:textSize="14sp" 
+            android:layout_marginBottom="4dp"/>
+        <Spinner 
+            android:id="@+id/spinner_asr_juristic" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" android:minHeight="50dp" 
+            android:background="@drawable/bg_spinner_dark" 
+            android:layout_marginBottom="12dp"/>
+
+        <androidx.appcompat.widget.SwitchCompat 
+            android:id="@+id/switch_show_shuruq" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:text="Show Sunrise (Shuruq) / عرض الشروق" 
+            android:textColor="#FFFFFF" 
+            android:layout_marginBottom="12dp"/>
+
+        <androidx.appcompat.widget.SwitchCompat 
+            android:id="@+id/switch_show_remaining" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:text="Show Remaining Time / إظهار الوقت المتبقي" 
+            android:textColor="#FFFFFF" 
+            android:layout_marginBottom="12dp"/>
+
+        <androidx.appcompat.widget.SwitchCompat 
+            android:id="@+id/switch_show_times" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:text="Show Prayer Times / عرض الأوقات" 
+            android:textColor="#FFFFFF" 
+            android:layout_marginBottom="12dp"/>
+
+        <androidx.appcompat.widget.SwitchCompat 
+            android:id="@+id/switch_show_next_only" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:text="Next Prayer Only / الصلاة القادمة فقط" 
+            android:textColor="#FFFFFF" 
+            android:layout_marginBottom="12dp"/>
+
+        <androidx.appcompat.widget.SwitchCompat 
+            android:id="@+id/switch_show_remaining_only" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:text="Remaining Time Only / عرض العد التنازلي فقط" 
+            android:textColor="#FFFFFF" 
+            android:layout_marginBottom="24dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton android:background="@drawable/bg_rounded_btn" android:id="@+id/btn_sync_gps" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:text="Sync Location (GPS) / تحديث الموقع" android:backgroundTint="#FF5722" android:layout_marginBottom="12dp"/>
+        <androidx.appcompat.widget.AppCompatButton android:background="@drawable/bg_rounded_btn" android:id="@+id/btn_update_now" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:text="Update Widget Now / تحديث الويدجت الآن" android:backgroundTint="#FF9800" android:layout_marginBottom="24dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton android:background="@drawable/bg_rounded_btn"
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="60dp"
+            android:text="SAVE SETTINGS / حفظ"
+            android:backgroundTint="#4CAF50"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="32dp"/>
+
+    </LinearLayout>
+</ScrollView>

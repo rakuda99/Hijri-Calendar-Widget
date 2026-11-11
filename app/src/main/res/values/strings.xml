@@ -1,0 +1,47 @@
+<resources>
+    <string name="app_name">Design Calendar</string>
+    <string name="hijri_calendar_widget">Hijri Calendar</string>
+    <string name="settings_title">Widget Settings</string>
+    <string name="label_language">Language / اللغة</string>
+    <string name="label_font_size">Font Size / حجم الخط</string>
+    <string name="label_text_color">Text Color / لون النص</string>
+    <string name="label_clock_color">Clock Color / لون الساعة</string>
+    <string name="label_hijri_color">Hijri Color / لون التاريخ الهجري</string>
+    <string name="label_greg_color">Gregorian Color / لون التاريخ الميلادي</string>
+    <string name="label_clock_size">Clock Size / حجم الساعة</string>
+    <string name="label_hijri_size">Hijri Size / حجم الهجري</string>
+    <string name="label_greg_size">Gregorian Size / حجم الميلادي</string>
+    <string name="label_show_h">Show Hijri Symbol / عرض حرف هـ</string>
+    <string name="label_show_m">Show Greg Symbol / عرض حرف م</string>
+    <string name="label_arabic_ampm">Arabic AM/PM / ص م بدلاً من AM PM</string>
+    <string name="label_show_clock">Show Clock / عرض الساعة</string>
+    <string name="label_show_hijri">Show Hijri / عرض التاريخ الهجري</string>
+    <string name="label_show_greg">Show Gregorian / عرض التاريخ الميلادي</string>
+    <string name="label_month_format">Month Format / تنسيق الأشهر</string>
+    <string name="label_background">Background / الخلفية</string>
+    <string name="label_use_24h">Use 24-Hour Clock / نظام 24 ساعة</string>
+    <string name="label_pad_dates">Double Digit Dates / أرقام ثنائية (01, 02..)</string>
+    <string name="label_show_day_arabic">Arabic Day / اليوم بالعربي</string>
+    <string name="label_show_day_english">English Day / اليوم بالإنجليزي</string>
+    <string name="label_day_orientation">Day Orientation / اتجاه اليوم</string>
+    <string name="orientation_vertical">Vertical / عمودي</string>
+    <string name="orientation_horizontal">Horizontal / أفقي</string>
+    <string name="label_month_orientation">Calendar Layout / تصميم التقويم</string>
+    <string name="label_month_day_language">Day Language / لغة الأيام</string>
+    <string name="label_week_start">Start of Week / بداية الأسبوع</string>
+    <string name="day_sunday">Sunday / الأحد</string>
+    <string name="day_monday">Monday / الإثنين</string>
+    <string name="btn_update">Update Widget / تحديث</string>
+    <string name="note_text">Note: You may need to wait a few seconds for changes to appear.</string>
+    <string name="developer_credit">Developed by: Dr.Sulaiman Alsehaim\nrakuda99@gmail.com</string>
+    <string name="label_show_temperature">Show Temperature / عرض درجة الحرارة</string>
+    <string name="label_temperature_interval">Update Interval / وقت التحديث</string>
+    
+    <string-array name="temperature_interval_options">
+        <item>15 Minutes / 15 دقيقة</item>
+        <item>30 Minutes / 30 دقيقة</item>
+        <item>1 Hour / ساعة واحدة</item>
+        <item>2 Hours / ساعتان</item>
+        <item>6 Hours / 6 ساعات</item>
+    </string-array>
+</resources>

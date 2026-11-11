@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_hub_gradient"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/lbl_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Calendar Widget Settings\n(إعدادات التقويم الشهري)"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView android:id="@+id/lbl_orientation" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Orientation / اتجاه التقويم" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_month_orientation" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <TextView android:id="@+id/lbl_day_lang" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Day Language / لغة الأيام" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_month_day_language" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <TextView android:id="@+id/lbl_week_start" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Week Start / بداية الأسبوع" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_week_start" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <TextView android:id="@+id/lbl_greg_color" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Greg Color / لون الميلادي" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_month_greg_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <TextView android:id="@+id/lbl_hijri_color" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Hijri Color / لون الهجري" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_month_hijri_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <TextView android:id="@+id/lbl_today_circle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Today Circle / دائرة اليوم" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_month_today_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <TextView android:id="@+id/lbl_event_dot" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Event Dot / نقطة الموعد" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_month_event_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <TextView android:id="@+id/lbl_day_size" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Day Size (Numbers) / حجم أرقام الأيام" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_month_day_size" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <TextView android:id="@+id/lbl_week_header_color" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Weekdays Color / لون أسماء الأيام" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_month_week_header_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <TextView android:id="@+id/lbl_week_header_size" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Weekdays Size / حجم أسماء الأيام" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_month_week_header_size" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <TextView android:id="@+id/lbl_bg_color" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Background Color / لون الخلفية" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_month_bg_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="16dp"/>
+
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_month_day_bold" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Bold Text / خط غامق" android:textColor="#FFFFFF" android:layout_marginBottom="4dp"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_month_hollow_circle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Hollow Circle / دائرة مفرغة" android:textColor="#FFFFFF" android:layout_marginBottom="4dp"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_month_show_arrows" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Show Arrows / عرض الأسهم" android:textColor="#FFFFFF" android:layout_marginBottom="4dp"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_month_open_app" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Open App on Click / فتح التطبيق عند اللمس" android:textColor="#FFFFFF" android:layout_marginBottom="4dp"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_month_show_greg" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Show Greg / إظهار الميلادي" android:textColor="#FFFFFF" android:layout_marginBottom="4dp"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_month_show_hijri" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Show Hijri / إظهار الهجري" android:textColor="#FFFFFF" android:layout_marginBottom="16dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton android:background="@drawable/bg_rounded_btn" android:id="@+id/btn_perm_calendar" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Calendar Permission / صلاحية قراءة التقويم" android:backgroundTint="#FF9800" android:layout_marginBottom="32dp" />
+
+        <androidx.appcompat.widget.AppCompatButton android:background="@drawable/bg_rounded_btn"
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="60dp"
+            android:paddingVertical="8dp"
+            android:text="SAVE CALENDAR SETTINGS / حفظ"
+            android:backgroundTint="#009688"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
+
+    </LinearLayout>
+</ScrollView>

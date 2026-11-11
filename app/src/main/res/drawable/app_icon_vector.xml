@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Background: Emerald Green -->
+    <path
+        android:fillColor="#00695C"
+        android:pathData="M0,0h108v108h-108z"/>
+    
+    <!-- Calendar Body: Gold Outline -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M24,24 h60 a4,4 0 0 1 4,4 v56 a4,4 0 0 1 -4,4 h-60 a4,4 0 0 1 -4,-4 v-56 a4,4 0 0 1 4,-4 z" />
+    
+    <!-- Calendar Inner: White -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M28,38 h52 v42 h-52 z" />
+
+    <!-- Header Line -->
+    <path
+        android:fillColor="#004D40"
+        android:pathData="M24,28 h60 v10 h-60 z" />
+
+    <!-- Clock Circle Symbol (representing "Design your Clock") -->
+    <path
+        android:fillColor="#00695C"
+        android:pathData="M54,50 a10,10 0 1,0 0,20 a10,10 0 1,0 0,-20 z" />
+        
+    <!-- Clock Hands -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M53,52 h2 v8 h-2 z" />
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M54,59 h6 v2 h-6 z" />
+
+</vector>

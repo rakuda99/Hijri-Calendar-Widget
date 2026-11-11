@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:padding="8dp">
+
+    <!-- Top Bar: Settings Button -->
+    <ImageButton
+        android:id="@+id/btn_settings"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:background="?android:attr/selectableItemBackground"
+        android:src="@android:drawable/ic_menu_preferences"
+        android:tint="#FFFFFF"
+        android:padding="8dp"/>
+
+    <!-- Header: Month Name and Navigation -->
+    <LinearLayout
+        android:id="@+id/header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/btn_settings"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp"
+        android:layout_marginTop="4dp">
+
+        <ImageView
+            android:id="@+id/btn_prev_month"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="12dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:tint="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/month_year_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Month 2026"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btn_next_month"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="12dp"
+            android:src="@android:drawable/ic_media_next"
+            android:tint="#FFFFFF" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/week_header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header_layout"
+        android:orientation="horizontal"
+        android:weightSum="7"
+        android:paddingBottom="4dp">
+
+        <TextView android:id="@+id/day_name_1" style="@style/DayHeaderStyle" android:text="SUN" />
+        <TextView android:id="@+id/day_name_2" style="@style/DayHeaderStyle" android:text="MON" />
+        <TextView android:id="@+id/day_name_3" style="@style/DayHeaderStyle" android:text="TUE" />
+        <TextView android:id="@+id/day_name_4" style="@style/DayHeaderStyle" android:text="WED" />
+        <TextView android:id="@+id/day_name_5" style="@style/DayHeaderStyle" android:text="THU" />
+        <TextView android:id="@+id/day_name_6" style="@style/DayHeaderStyle" android:text="FRI" />
+        <TextView android:id="@+id/day_name_7" style="@style/DayHeaderStyle" android:text="SAT" />
+    </LinearLayout>
+
+    <GridView
+        android:id="@+id/calendar_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/week_header_layout"
+        android:layout_above="@id/settings_shortcut_layout"
+        android:gravity="center"
+        android:listSelector="@android:color/transparent"
+        android:numColumns="7"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="2dp" />
+
+    <LinearLayout
+        android:id="@+id/settings_shortcut_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/tv_version_main"
+        android:orientation="horizontal"
+        android:weightSum="3"
+        android:padding="8dp">
+
+        <Button
+            android:id="@+id/btn_clock_settings_main"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Clock\n(ساعة)"
+            android:textSize="11sp"
+            android:layout_marginEnd="2dp"
+            android:backgroundTint="#6200EE"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/btn_prayer_settings_main"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Prayer\n(صلاة)"
+            android:textSize="11sp"
+            android:layout_marginHorizontal="2dp"
+            android:backgroundTint="#FF9800"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/btn_calendar_settings_main"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Calendar\n(تقويم)"
+            android:textSize="11sp"
+            android:layout_marginStart="2dp"
+            android:backgroundTint="#009688"
+            android:textColor="#FFFFFF"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_version_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="v4.2 Tabs"
+        android:textColor="#555555"
+        android:textSize="10sp"
+        android:layout_marginBottom="4dp"/>
+
+</RelativeLayout>

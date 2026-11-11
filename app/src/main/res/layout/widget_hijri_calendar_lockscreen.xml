@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="8dp">
+
+    <!-- Clock Layout Container -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="4dp">
+
+        <!-- English Day (Vertical on the left) -->
+        <TextView
+            android:id="@+id/day_english_text_lockscreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mon"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"
+            android:rotation="-90"
+            android:fontFamily="sans-serif-black"
+            android:alpha="0.8"
+            android:includeFontPadding="false"
+            android:layout_marginEnd="-8dp"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="bottom">
+
+            <!-- Main Time (Human Readable, e.g., 7:09) -->
+            <TextClock
+                android:id="@+id/clock_text_lockscreen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:format12Hour="h:mm"
+                android:format24Hour="kk:mm"
+                android:textSize="50sp"
+                android:textColor="@android:color/white"
+                android:fontFamily="sans-serif-light"
+                android:shadowColor="#80000000"
+                android:shadowDx="2"
+                android:shadowDy="2"
+                android:shadowRadius="4"
+                android:includeFontPadding="false" />
+
+            <!-- AM/PM Indicator (Small, next to clock) -->
+            <TextClock
+                android:id="@+id/ampm_text_lockscreen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:format12Hour="a"
+                android:format24Hour=""
+                android:textSize="14sp"
+                android:textColor="@android:color/white"
+                android:fontFamily="sans-serif"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="8dp"/> 
+        </LinearLayout>
+
+        <!-- Arabic Day (Vertical on the right) -->
+        <TextView
+            android:id="@+id/day_arabic_text_lockscreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="الاثنين"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"
+            android:rotation="-90"
+            android:fontFamily="sans-serif-black"
+            android:alpha="0.8"
+            android:includeFontPadding="false"
+            android:layout_marginStart="-8dp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+    <!-- Hijri Date (Main Date) -->
+    <TextView
+        android:id="@+id/hijri_date_text_lockscreen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="23 Rajab"
+        android:textSize="22sp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif"
+        android:shadowColor="#80000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="3"
+        android:layout_marginTop="-4dp"/>
+
+    <!-- Gregorian Date (Secondary) -->
+    <TextView
+        android:id="@+id/gregorian_date_text_lockscreen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Monday, January 12"
+        android:textSize="14sp"
+        android:textColor="#E0E0E0"
+        android:fontFamily="sans-serif"
+        android:shadowColor="#80000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="2"
+        android:layout_marginTop="4dp" />
+
+</LinearLayout>

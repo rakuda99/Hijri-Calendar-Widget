@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_hub_gradient"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title_en"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Clock Widget Settings"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:gravity="center" />
+        <TextView
+            android:id="@+id/title_ar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="إعدادات ساعة الشاشة"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Language -->
+        <TextView android:id="@+id/lbl_lang_en" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Language" android:textColor="#BBBBBB" android:textSize="14sp"/>
+        <TextView android:id="@+id/lbl_lang_ar" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="اللغة" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_language" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <!-- Digit Style -->
+        <TextView android:id="@+id/lbl_digit_en" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Digit Style" android:textColor="#BBBBBB" android:textSize="14sp"/>
+        <TextView android:id="@+id/lbl_digit_ar" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="شكل الأرقام" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_digit_style" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <!-- Colors -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:weightSum="2" android:layout_marginBottom="8dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="4dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Clock Color / لون الساعة" android:textColor="#BBBBBB" android:textSize="12sp"/>
+                <Spinner android:id="@+id/spinner_clock_color" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/bg_spinner_dark"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="4dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Clock Size / الحجم" android:textColor="#BBBBBB" android:textSize="12sp"/>
+                <Spinner android:id="@+id/spinner_clock_size" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/bg_spinner_dark"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_show_clock_visibility" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Show Clock / عرض الساعة" android:textColor="#FFFFFF" android:layout_marginBottom="8dp"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_large_time_labels" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Large Time Labels / تكبير مسميات الوقت" android:textColor="#FFFFFF" android:layout_marginBottom="16dp"/>
+
+        <!-- Hijri -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:weightSum="2" android:layout_marginBottom="8dp">
+             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="4dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Hijri Color / لون الهجري" android:textColor="#BBBBBB" android:textSize="12sp"/>
+                <Spinner android:id="@+id/spinner_hijri_color" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/bg_spinner_dark"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="4dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Hijri Size / الحجم" android:textColor="#BBBBBB" android:textSize="12sp"/>
+                <Spinner android:id="@+id/spinner_hijri_size" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/bg_spinner_dark"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_show_h" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Show Hijri Symbol (هـ)" android:textColor="#FFFFFF" android:layout_marginBottom="4dp"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_show_hijri_visibility" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Show Hijri Date / عرض التاريخ الهجري" android:textColor="#FFFFFF" android:layout_marginBottom="12dp"/>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Hijri Adjustment / تعديل الهجري" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_hijri_correction" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="16dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton android:background="@drawable/bg_rounded_btn" android:id="@+id/btn_sync_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:paddingVertical="8dp" android:text="Sync Time Now / مزامنة الوقت الآن" android:backgroundTint="#F44336" android:layout_marginBottom="24dp"/>
+
+        <!-- Gregorian -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:weightSum="2" android:layout_marginBottom="8dp">
+             <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="4dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Gregorian Color / لون الميلادي" android:textColor="#BBBBBB" android:textSize="12sp"/>
+                <Spinner android:id="@+id/spinner_greg_color" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/bg_spinner_dark"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="4dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Gregorian Size / الحجم" android:textColor="#BBBBBB" android:textSize="12sp"/>
+                <Spinner android:id="@+id/spinner_greg_size" android:layout_width="match_parent" android:layout_height="48dp" android:background="@drawable/bg_spinner_dark"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_show_m" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Show Greg Symbol (م)" android:textColor="#FFFFFF" android:layout_marginBottom="4dp"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_show_greg_visibility" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Show Gregorian / عرض الميلادي" android:textColor="#FFFFFF" android:layout_marginBottom="4dp"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_arabic_ampm" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Arabic AM/PM / ص، م" android:textColor="#FFFFFF" android:layout_marginBottom="4dp"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_use_24h" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Use 24-Hour / نظام 24 ساعة" android:textColor="#FFFFFF" android:layout_marginBottom="16dp"/>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Background / الخلفية" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_bg_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Month Format / تنسيق الشهر" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_month_format" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="16dp"/>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Day Color / لون اليوم" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_day_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="12dp"/>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Day Display / عرض اليوم" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_day_language" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="4dp"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_day_position_left" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Day Text on Left / الأيام يسار الساعة" android:textColor="#FFFFFF" android:layout_marginBottom="4dp"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_day_horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Show Days Horizontally / عرض الأيام بشكل أفقي" android:textColor="#FFFFFF" android:layout_marginBottom="16dp"/>
+
+        <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_show_temperature" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/label_show_temperature" android:textColor="#FFFFFF" android:layout_marginBottom="4dp"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/label_temperature_interval" android:textColor="#BBBBBB" android:textSize="14sp" android:layout_marginBottom="4dp"/>
+        <Spinner android:id="@+id/spinner_temperature_interval" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="50dp" android:background="@drawable/bg_spinner_dark" android:layout_marginBottom="32dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton android:background="@drawable/bg_rounded_btn"
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="60dp"
+            android:paddingVertical="8dp"
+            android:text="SAVE CLOCK SETTINGS / حفظ"
+            android:backgroundTint="#4CAF50"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Background: Deep Emerald Green -->
+    <path
+        android:fillColor="#004D40"
+        android:pathData="M0,0h108v108h-108z"/>
+
+    <!-- 
+       Vertical Calendar Simulation 
+       Opacity: 80% White (#CCFFFFFF) 
+       Using simple paths to represent Arabic Numbers and Text Lines 
+    -->
+    <group>
+        
+        <!-- ROW 1: Number 1 (١) and Text Line -->
+        <path android:fillColor="#CCFFFFFF" android:pathData="M70,18 h28 v2 h-28 z" /> <!-- Text Line -->
+        <path android:strokeColor="#CCFFFFFF" android:strokeWidth="2" android:pathData="M50,16 v6" /> <!-- Number 1 (١) -->
+
+        <!-- ROW 2: Number 2 (٢) and Text Line -->
+        <path android:fillColor="#CCFFFFFF" android:pathData="M70,30 h28 v2 h-28 z" />
+        <path android:strokeColor="#CCFFFFFF" android:strokeWidth="2" android:pathData="M54,28 h-4 v6" /> <!-- Number 2 (٢ approx) -->
+
+        <!-- ROW 3: Number 3 (٣) and Text Line -->
+        <path android:fillColor="#CCFFFFFF" android:pathData="M70,42 h28 v2 h-28 z" />
+        <path android:strokeColor="#CCFFFFFF" android:strokeWidth="2" android:pathData="M54,40 h-4 v6 M54,40 v2 M52,40 v2" /> <!-- Number 3 (٣ approx) -->
+
+        <!-- ROW 4: Number 4 (٤) and Text Line -->
+        <path android:fillColor="#CCFFFFFF" android:pathData="M70,54 h28 v2 h-28 z" />
+        <path android:strokeColor="#CCFFFFFF" android:strokeWidth="2" android:pathData="M54,52 c-2,0 -4,2 -2,4 c2,0 0,4 -2,4" /> <!-- Number 4 (٤ approx) -->
+
+        <!-- ROW 5: Number 5 (٥) and Text Line -->
+        <path android:fillColor="#CCFFFFFF" android:pathData="M70,66 h28 v2 h-28 z" />
+        <path android:strokeColor="#CCFFFFFF" android:strokeWidth="2" android:pathData="M52,64 a3,3 0 1,0 0,6 a3,3 0 1,0 0,-6" /> <!-- Number 5 (٥) -->
+        
+        <!-- ROW 6 & 7: Repeating -->
+        <path android:fillColor="#CCFFFFFF" android:pathData="M70,78 h28 v2 h-28 z" />
+        <path android:strokeColor="#CCFFFFFF" android:strokeWidth="2" android:pathData="M50,76 v6" />
+
+        <path android:fillColor="#CCFFFFFF" android:pathData="M70,90 h28 v2 h-28 z" />
+        <path android:strokeColor="#CCFFFFFF" android:strokeWidth="2" android:pathData="M54,88 h-4 v6" />
+
+        <!-- Repeat Grid on Left side to fill space -->
+        <path android:strokeColor="#80FFFFFF" android:strokeWidth="2" android:pathData="M30,16 v6 M30,40 v6 M30,64 v6 M30,88 v6" />
+        <path android:strokeColor="#80FFFFFF" android:strokeWidth="2" android:pathData="M15,28 h4 v6 M15,52 h4 v6 M15,76 h4 v6" />
+
+    </group>
+
+    <!-- Foreground: Large Golden Crescent & Star with Shadow Effect -->
+    <!-- Helper shadow circle -->
+    <path
+        android:fillColor="#40000000"
+        android:pathData="M60,49 A25,25 0 1,1 25,84 A28,28 0 1,0 60,49 z" />
+        
+    <!-- Main Crescent -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M60,48 A25,25 0 1,1 25,83 A28,28 0 1,0 60,48 z" />
+
+    <!-- Star -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M68,43 l2,6 l6,2 l-6,2 l-2,6 l-2,-6 l-6,-2 l6,-2 z" />
+
+</vector>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layoutDirection="rtl"
+    android:padding="12dp">
+
+    <!-- Header (Clock & Status) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/tv_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="--:--"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/tajawal"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Prominent Next Prayer -->
+    <LinearLayout
+        android:id="@+id/ll_next_prayer_only"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="@drawable/prayer_bg_glass"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone">
+        <TextView android:id="@+id/tv_single_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="الصلاة القادمة" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold" android:fontFamily="@font/tajawal" />
+        <TextView android:id="@+id/tv_single_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--:--" android:textColor="#FBCD34" android:textSize="24sp" android:textStyle="bold" android:fontFamily="@font/tajawal" />
+    </LinearLayout>
+
+    <!-- Main List -->
+    <LinearLayout
+        android:id="@+id/ll_all_prayers_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#15FFFFFF"
+        android:padding="4dp">
+
+        <LinearLayout android:id="@+id/ll_fajr" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp" android:gravity="center_vertical">
+            <TextView android:id="@+id/tv_fajr_name" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="الفجر" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold" android:fontFamily="@font/tajawal" />
+            <TextView android:id="@+id/tv_fajr_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--:--" android:textColor="#BBBBBB" android:textSize="16sp" android:fontFamily="@font/tajawal" android:paddingBottom="4dp" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/ll_sunrise" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp" android:gravity="center_vertical">
+            <TextView android:id="@+id/tv_sunrise_name" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="الشروق" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold" android:fontFamily="@font/tajawal" />
+            <TextView android:id="@+id/tv_sunrise_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--:--" android:textColor="#BBBBBB" android:textSize="16sp" android:fontFamily="@font/tajawal" android:paddingBottom="4dp" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/ll_dhuhr" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp" android:gravity="center_vertical">
+            <TextView android:id="@+id/tv_dhuhr_name" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="الظهر" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold" android:fontFamily="@font/tajawal" />
+            <TextView android:id="@+id/tv_dhuhr_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--:--" android:textColor="#BBBBBB" android:textSize="16sp" android:fontFamily="@font/tajawal" android:paddingBottom="4dp" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/ll_asr" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp" android:gravity="center_vertical">
+            <TextView android:id="@+id/tv_asr_name" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="العصر" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold" android:fontFamily="@font/tajawal" />
+            <TextView android:id="@+id/tv_asr_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--:--" android:textColor="#BBBBBB" android:textSize="16sp" android:fontFamily="@font/tajawal" android:paddingBottom="4dp" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/ll_maghrib" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp" android:gravity="center_vertical">
+            <TextView android:id="@+id/tv_maghrib_name" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="المغرب" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold" android:fontFamily="@font/tajawal" />
+            <TextView android:id="@+id/tv_maghrib_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--:--" android:textColor="#BBBBBB" android:textSize="16sp" android:fontFamily="@font/tajawal" android:paddingBottom="4dp" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/ll_isha" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="10dp" android:gravity="center_vertical">
+            <TextView android:id="@+id/tv_isha_name" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="العشاء" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold" android:fontFamily="@font/tajawal" />
+            <TextView android:id="@+id/tv_isha_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--:--" android:textColor="#BBBBBB" android:textSize="16sp" android:fontFamily="@font/tajawal" android:paddingBottom="4dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_remaining"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="بقي: --"
+        android:textColor="#FBCD34"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/tajawal"
+        android:gravity="center"
+        android:layout_marginTop="12dp" />
+
+</LinearLayout>

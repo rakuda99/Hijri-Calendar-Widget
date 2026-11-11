@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_month_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF1A1A1A"
+    android:padding="2dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="4dp">
+
+        <ImageView
+            android:id="@+id/btn_prev_month"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="4dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:tint="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/month_year_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btn_next_month"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="4dp"
+            android:src="@android:drawable/ic_media_next"
+            android:tint="#FFFFFF" />
+    </LinearLayout>
+
+    <!-- Week Header -->
+    <LinearLayout
+        android:id="@+id/week_header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header_layout"
+        android:orientation="horizontal"
+        android:weightSum="7"
+        android:paddingBottom="1dp">
+        <!-- Re-adding explicit Header TextViews for stability -->
+        <TextView android:id="@+id/day_name_1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:padding="1dp" android:textColor="#88FFFFFF" android:textSize="10sp" android:maxLines="2" />
+        <TextView android:id="@+id/day_name_2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:padding="1dp" android:textColor="#88FFFFFF" android:textSize="10sp" android:maxLines="2" />
+        <TextView android:id="@+id/day_name_3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:padding="1dp" android:textColor="#88FFFFFF" android:textSize="10sp" android:maxLines="2" />
+        <TextView android:id="@+id/day_name_4" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:padding="1dp" android:textColor="#88FFFFFF" android:textSize="10sp" android:maxLines="2" />
+        <TextView android:id="@+id/day_name_5" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:padding="1dp" android:textColor="#88FFFFFF" android:textSize="10sp" android:maxLines="2" />
+        <TextView android:id="@+id/day_name_6" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:padding="1dp" android:textColor="#88FFFFFF" android:textSize="10sp" android:maxLines="2" />
+        <TextView android:id="@+id/day_name_7" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:padding="1dp" android:textColor="#88FFFFFF" android:textSize="10sp" android:maxLines="2" />
+    </LinearLayout>
+
+    <!-- GRID -->
+    <GridView
+        android:id="@+id/calendar_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/week_header_layout"
+        android:numColumns="7"
+        android:stretchMode="columnWidth"
+        android:gravity="center"
+        android:verticalSpacing="1dp"
+        android:horizontalSpacing="1dp" />
+
+</RelativeLayout>

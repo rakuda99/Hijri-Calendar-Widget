@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_month_vertical_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF000077"
+    android:padding="4dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/btn_prev_month"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@android:drawable/ic_media_previous" />
+
+        <TextView
+            android:id="@+id/month_year_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btn_next_month"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@android:drawable/ic_media_next" />
+    </LinearLayout>
+
+    <!-- Side Headers (7 rows) - MOVED TO THE RIGHT [V9.2] -->
+    <LinearLayout
+        android:id="@+id/week_header_layout"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header_layout"
+        android:layout_alignParentRight="true"
+        android:orientation="vertical">
+        <TextView android:id="@+id/day_name_1" android:layout_width="match_parent" android:layout_height="45dp" android:layout_marginBottom="1dp" android:gravity="center" android:textColor="#CCCCCC" android:textSize="10sp" android:includeFontPadding="false" android:singleLine="true" android:maxLines="1" />
+        <TextView android:id="@+id/day_name_2" android:layout_width="match_parent" android:layout_height="45dp" android:layout_marginBottom="1dp" android:gravity="center" android:textColor="#CCCCCC" android:textSize="10sp" android:includeFontPadding="false" android:singleLine="true" android:maxLines="1" />
+        <TextView android:id="@+id/day_name_3" android:layout_width="match_parent" android:layout_height="45dp" android:layout_marginBottom="1dp" android:gravity="center" android:textColor="#CCCCCC" android:textSize="10sp" android:includeFontPadding="false" android:singleLine="true" android:maxLines="1" />
+        <TextView android:id="@+id/day_name_4" android:layout_width="match_parent" android:layout_height="45dp" android:layout_marginBottom="1dp" android:gravity="center" android:textColor="#CCCCCC" android:textSize="10sp" android:includeFontPadding="false" android:singleLine="true" android:maxLines="1" />
+        <TextView android:id="@+id/day_name_5" android:layout_width="match_parent" android:layout_height="45dp" android:layout_marginBottom="1dp" android:gravity="center" android:textColor="#CCCCCC" android:textSize="10sp" android:includeFontPadding="false" android:singleLine="true" android:maxLines="1" />
+        <TextView android:id="@+id/day_name_6" android:layout_width="match_parent" android:layout_height="45dp" android:layout_marginBottom="1dp" android:gravity="center" android:textColor="#CCCCCC" android:textSize="10sp" android:includeFontPadding="false" android:singleLine="true" android:maxLines="1" />
+        <TextView android:id="@+id/day_name_7" android:layout_width="match_parent" android:layout_height="45dp" android:gravity="center" android:textColor="#CCCCCC" android:textSize="10sp" android:includeFontPadding="false" android:singleLine="true" android:maxLines="1" />
+    </LinearLayout>
+
+    <FrameLayout 
+        android:id="@+id/divider"
+        android:layout_width="1dp" android:layout_height="match_parent" 
+        android:layout_toLeftOf="@id/week_header_layout"
+        android:layout_below="@id/header_layout"
+        android:layout_alignBottom="@id/week_header_layout"
+        android:background="#33FFFFFF" />
+
+    <!-- Actual Grid (6 cols) -->
+    <GridView
+        android:id="@+id/calendar_grid_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toLeftOf="@id/divider"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/header_layout"
+        android:layout_alignParentBottom="true"
+        android:numColumns="6"
+        android:gravity="center"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="1dp" />
+
+</RelativeLayout>

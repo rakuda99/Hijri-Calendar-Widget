@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingTop="8dp"
+    android:paddingBottom="2dp"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp">
+
+    <!-- Clock Layout Container -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="4dp">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="8dp"
+            android:layout_gravity="bottom">
+            
+            <LinearLayout
+                android:id="@+id/ll_day_left_normal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal|bottom"
+                android:visibility="gone">
+
+                <!-- Vertical Arabic Day Left -->
+                <TextView
+                    android:id="@+id/day_arabic_text_left"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="الاثنين"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/white"
+                    android:fontFamily="sans-serif-black"
+                    android:singleLine="true"
+                    android:includeFontPadding="false"
+                    android:visibility="gone"/>
+
+                <!-- Vertical English Day Left -->
+                <TextView
+                    android:id="@+id/day_english_text_left"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Mon"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/white"
+                    android:fontFamily="sans-serif-black"
+                    android:singleLine="true"
+                    android:includeFontPadding="false"
+                    android:visibility="gone"/>
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/ll_day_left_rotated"
+                android:layout_width="28dp"
+                android:layout_height="80dp"
+                android:layout_marginEnd="6dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/day_arabic_rotated_left"
+                    android:layout_width="80dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:rotation="-90"
+                    android:text="الاثنين"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/white"
+                    android:fontFamily="sans-serif-bold"
+                    android:maxLines="1"
+                    android:paddingBottom="2dp"
+                    android:includeFontPadding="false"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/day_english_rotated_left"
+                    android:layout_width="80dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:rotation="-90"
+                    android:text="Mon"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/white"
+                    android:fontFamily="sans-serif-bold"
+                    android:maxLines="1"
+                    android:paddingBottom="2dp"
+                    android:includeFontPadding="false"
+                    android:visibility="gone"/>
+            </FrameLayout>
+        </FrameLayout>
+
+        <!-- Temperature TextView -->
+        <TextView
+            android:id="@+id/temperature_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="--"
+            android:textSize="20sp"
+            android:textColor="@android:color/white"
+            android:fontFamily="sans-serif-light"
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="center_vertical"
+            android:shadowColor="#80000000"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="4"
+            android:includeFontPadding="false"
+            android:visibility="gone" />
+
+        <!-- Main Time (Human Readable, e.g., 7:09) -->
+        <TextClock
+            android:id="@+id/clock_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format12Hour="h:mm"
+            android:format24Hour="kk:mm"
+            android:textSize="56sp"
+            android:textColor="@android:color/white"
+            android:fontFamily="sans-serif-light"
+            android:shadowColor="#80000000"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="4"
+            android:includeFontPadding="false" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical|bottom"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="8dp">
+
+            <!-- AM/PM Indicator -->
+            <TextClock
+                android:id="@+id/ampm_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:format12Hour="a"
+                android:format24Hour=""
+                android:textSize="14sp"
+                android:textColor="@android:color/white"
+                android:fontFamily="sans-serif"
+                android:shadowColor="#80000000"
+                android:shadowDx="1"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                android:layout_marginEnd="4dp"
+                android:layout_marginBottom="2dp"/> 
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom">
+                
+                <LinearLayout
+                    android:id="@+id/ll_day_right_normal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal|bottom"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/day_arabic_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="الاثنين"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:fontFamily="sans-serif-black"
+                        android:singleLine="true"
+                        android:includeFontPadding="false"
+                        android:visibility="gone"/>
+
+                    <TextView
+                        android:id="@+id/day_english_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mon"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:fontFamily="sans-serif-black"
+                        android:singleLine="true"
+                        android:includeFontPadding="false"
+                        android:visibility="gone"/>
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/ll_day_right_rotated"
+                    android:layout_width="28dp"
+                    android:layout_height="80dp"
+                    android:layout_marginStart="6dp"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/day_arabic_rotated"
+                        android:layout_width="80dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:rotation="90"
+                        android:text="الاثنين"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:fontFamily="sans-serif-bold"
+                        android:maxLines="1"
+                        android:paddingBottom="2dp"
+                        android:includeFontPadding="false"
+                        android:visibility="gone"/>
+
+                    <TextView
+                        android:id="@+id/day_english_rotated"
+                        android:layout_width="80dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:rotation="90"
+                        android:text="Mon"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:fontFamily="sans-serif-bold"
+                        android:maxLines="1"
+                        android:paddingBottom="2dp"
+                        android:includeFontPadding="false"
+                        android:visibility="gone"/>
+                </FrameLayout>
+            </FrameLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Horizontal Day Name (Valid if orientation is horizontal) -->
+    <TextView
+        android:id="@+id/day_horizontal_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Monday - الاثنين"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:fontFamily="sans-serif-bold"
+        android:singleLine="true"
+        android:includeFontPadding="false"
+        android:layout_marginTop="-8dp"
+        android:layout_marginBottom="4dp"
+        android:visibility="gone"/>
+
+    <!-- Hijri Date (Main Date) -->
+    <TextView
+        android:id="@+id/hijri_date_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="23 Rajab"
+        android:textSize="22sp"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif"
+        android:maxLines="1"
+        android:paddingBottom="6dp"
+        android:shadowColor="#80000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="3"
+        android:layout_marginTop="-4dp"/>
+
+    <!-- Gregorian Date (Secondary) -->
+    <TextView
+        android:id="@+id/gregorian_date_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Monday, January 12"
+        android:textSize="14sp"
+        android:textColor="#E0E0E0"
+        android:fontFamily="sans-serif"
+        android:maxLines="1"
+        android:paddingBottom="6dp"
+        android:shadowColor="#80000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="2"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="0dp" />
+
+</LinearLayout>

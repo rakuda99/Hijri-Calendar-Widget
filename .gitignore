@@ -1,0 +1,69 @@
+# Android / Gradle
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# App-specific build outputs
+app/build/
+app_broken_attempt/
+Backups/
+Restore_Clean_v2_3/
+Restore_Temp/
+Restore_V1_Temp/
+
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Distribution / build artifacts
+dist/
+
+# Temporary files
+*.tmp
+*.bak
+build_err.txt
+
+# Local properties (keystore, SDK path, etc.)
+local.properties
+keystore.properties
+*.jks
+*.keystore
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Agent / AI tools config
+.agents/
+.claude/
+.claude-flow/
+.swarm/
+.mcp.json
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS files
+Thumbs.db
+desktop.ini

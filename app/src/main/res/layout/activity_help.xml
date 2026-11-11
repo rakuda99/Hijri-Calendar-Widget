@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="User Guide / دليل الاستخدام"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Arabic Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="باللغة العربية:"
+            android:textColor="#009688"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. كيفية إضافة الودجت (الأدوات):\nاضغط مطولاً على أي منطقة فارغة في الشاشة الرئيسية، اختر 'الودجات' أو 'الأدوات'، ابحث عن 'Hijri Widget'، ثم اختر الشكل الذي تفضله (ساعة أو تقويم).\n\n2. تخصيص المظهر:\nافتح التطبيق من قائمة البرامج، انتقل إلى 'إعدادات الساعة' أو 'إعدادات التقويم'، اختر الألوان والأحجام التي تناسبك، ثم اضغط على زر 'حفظ' باللون الأخضر في الأسفل.\n\n3. مزامنة الوقت:\nإذا لاحظت أن الوقت غير متطابق مع هاتفك، انتقل إلى 'إعدادات الساعة' واضغط على زر 'مزامنة الوقت الآن' ليقوم التطبيق بتصحيح الوقت تلقائياً.\n\n4. تعديل التاريخ الهجري:\nيمكنك تعديل التاريخ الهجري (بزيادة أو نقص يومين) من خلال قائمة 'تعديل الهجري' في إعدادات الساعة."
+            android:textColor="#EEEEEE"
+            android:textSize="14sp"
+            android:lineSpacingExtra="4dp"
+            android:layout_marginBottom="32dp"
+            android:gravity="right"/>
+
+        <!-- English Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="In English:"
+            android:textColor="#6200EE"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. How to Add Widgets:\nLong-press any empty area on your home screen, select 'Widgets', search for 'Hijri Widget', and drag the clock or calendar to your screen.\n\n2. Customizing Appearance:\nOpen the app, go to 'Clock Settings' or 'Calendar Settings'. Choose your preferred colors, sizes, and formats, then press the green 'SAVE' button at the bottom.\n\n3. Time Synchronization:\nIf the widget time is not accurate, go to 'Clock Settings' and press 'Sync Time Now' to force a network time update.\n\n4. Hijri Adjustment:\nYou can manually adjust the Hijri date (up to +/- 2 days) using the 'Hijri Adjustment' dropdown in Clock Settings."
+            android:textColor="#EEEEEE"
+            android:textSize="14sp"
+            android:lineSpacingExtra="4dp"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- About Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="حول / About"
+            android:textColor="#FF9800"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="تم إنتاج هذا البرنامج بمساعدة الذكاء الاصطناعي، بواسطة الدكتور سليمان السحيم، تحت مظلة rakuda99.\nrakuda99@gmail.com\n\nThis program was produced with the help of artificial intelligence, by Dr. Sulaiman Alsuhaim, under the umbrella of rakuda99.\nrakuda99@gmail.com"
+            android:textColor="#BBBBBB"
+            android:textSize="14sp"
+            android:lineSpacingExtra="4dp"
+            android:layout_marginBottom="32dp"
+            android:gravity="center"
+            android:autoLink="email"/>
+
+        <Button
+            android:id="@+id/btn_back_help"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Back / رجوع"
+            android:backgroundTint="#607D8B"
+            android:layout_marginTop="16dp"/>
+
+    </LinearLayout>
+</ScrollView>
