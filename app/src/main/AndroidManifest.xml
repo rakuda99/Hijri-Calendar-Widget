@@ -45,10 +45,11 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <!-- React to date/time changes so the widget never shows a stale date -->
                 <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.TIME_CHANGED" />
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -62,6 +63,10 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.TIME_CHANGED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
@@ -81,6 +86,8 @@
                 <action android:name="com.example.hijricalendarwidget.ACTION_PERIODIC_SYNC" />
                 <action android:name="com.example.hijricalendarwidget.ACTION_MIDNIGHT_UPDATE" />
                 <action android:name="com.example.hijricalendarwidget.ACTION_WEATHER_SYNC" />
+                <!-- Force-refresh action: wipes location+prayer caches and re-fetches immediately -->
+                <action android:name="com.example.hijricalendarwidget.ACTION_FORCE_LOCATION_REFRESH" />
             </intent-filter>
         </receiver>
 
@@ -89,6 +96,10 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.TIME_CHANGED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

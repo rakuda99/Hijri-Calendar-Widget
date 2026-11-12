@@ -3,8 +3,14 @@ package com.example.hijricalendarwidget;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 public class SyncReceiver extends BroadcastReceiver {
+
+    /** Broadcast this action to force an immediate location + prayer refresh. */
+    public static final String ACTION_FORCE_LOCATION_REFRESH =
+            "com.example.hijricalendarwidget.ACTION_FORCE_LOCATION_REFRESH";
+
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent == null || intent.getAction() == null) {
@@ -33,6 +39,14 @@ public class SyncReceiver extends BroadcastReceiver {
 
         } else if ("com.example.hijricalendarwidget.ACTION_WEATHER_SYNC".equals(action)) {
             WeatherUtils.triggerWeatherFetch(context);
+
+        } else if (ACTION_FORCE_LOCATION_REFRESH.equals(action)) {
+            // ── User pressed "Refresh Location" button ─────────────────────────
+            // 1. Wipe all stale caches (last_lat, last_lon, prayer JSON, network sync ts)
+            // 2. Force a full location + prayer + weather refresh immediately
+            Log.i("SyncReceiver", "Force location refresh requested by user.");
+            HijriDateUtils.invalidateLocationAndPrayerCache(context);
+            HijriDateUtils.syncTimeWithNetwork(context, true /* force = bypass 12h guard */);
         }
     }
 }

@@ -83,10 +83,15 @@ public class HijriDateUtils {
         long lastSync = prefs.getLong("last_network_sync", 0);
         long currentTime = System.currentTimeMillis();
 
-        // 12 hours = 43200000ms.
-        // The 12h guard only gates NETWORK operations (weather/prayer fetch).
-        // Widget date display always refreshes immediately regardless.
-        boolean skipNetwork = !force && (currentTime - lastSync < 43200000);
+        // ── PRIORITY RULE ──────────────────────────────────────────────────────────
+        // The 12-hour guard applies ONLY to weather/prayer API network calls.
+        // Location accuracy ALWAYS has higher priority than cache lifetime.
+        //
+        // When the device moves > 5 km, LocationUtils.invalidateLocationAndPrayerCache()
+        // resets last_network_sync to 0, so the guard is automatically bypassed on the
+        // next call without needing an explicit force=true here.
+        // ──────────────────────────────────────────────────────────────────────────
+        boolean skipNetwork = !force && (currentTime - lastSync < 43200000L); // 12 h
 
         // Always refresh widget date immediately from the local clock — no network required.
         refreshAllWidgetsNow(context);
@@ -108,18 +113,27 @@ public class HijriDateUtils {
                 connection.disconnect();
 
                 if (dateStr != null) {
-                    // Sync Location, Weather and Prayer Times if permitted
-                    if (androidx.core.content.ContextCompat.checkSelfPermission(context,
-                            android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED ||
+                    boolean hasLocation =
                         androidx.core.content.ContextCompat.checkSelfPermission(context,
-                            android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                            android.Manifest.permission.ACCESS_FINE_LOCATION)
+                                == android.content.pm.PackageManager.PERMISSION_GRANTED
+                        || androidx.core.content.ContextCompat.checkSelfPermission(context,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                                == android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+                    if (hasLocation) {
+                        // Location fetch performs its own movement check and cache invalidation
                         trySyncLocationAndPrayers(context, prefs);
                     } else {
-                        // Just refresh prayer times without GPS if no permission
+                        // No GPS permission — refresh prayer times from last saved location
                         PrayerUtils.fetchPrayerTimes(context, new PrayerUtils.PrayerCallback() {
                             @Override
                             public void onSuccess(org.json.JSONObject data) {
-                                prefs.edit().putString("prayer_times_json", data.toString()).apply();
+                                String json = data.toString();
+                                float lat = prefs.getFloat("last_lat", 0);
+                                float lon = prefs.getFloat("last_lon", 0);
+                                String city = prefs.getString("prayer_city", "");
+                                CacheManager.savePrayerCache(context, city, lat, lon, json);
                                 notifyPrayerWidget(context);
                             }
 
@@ -228,9 +242,28 @@ public class HijriDateUtils {
                 mIntent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, monthIds);
                 context.sendBroadcast(mIntent);
             }
+
+            int[] prayerIds = mgr.getAppWidgetIds(
+                    new android.content.ComponentName(context, PrayerWidgetProvider.class));
+            if (prayerIds != null && prayerIds.length > 0) {
+                android.content.Intent pIntent = new android.content.Intent(context,
+                        PrayerWidgetProvider.class);
+                pIntent.setAction(android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+                pIntent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, prayerIds);
+                context.sendBroadcast(pIntent);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Convenience wrapper — delegates to {@link LocationUtils#invalidateLocationAndPrayerCache}.
+     * Resets last_lat, last_lon, last_network_sync, prayer_times_json, and weather cache
+     * so the next {@link #syncTimeWithNetwork} call bypasses the 12-hour guard automatically.
+     */
+    public static void invalidateLocationAndPrayerCache(android.content.Context context) {
+        LocationUtils.invalidateLocationAndPrayerCache(context);
     }
 
     public static long getAdjustedTime(android.content.Context context) {
@@ -393,7 +426,9 @@ public class HijriDateUtils {
                 PrayerUtils.fetchPrayerTimes(context, lat, lon, new PrayerUtils.PrayerCallback() {
                     @Override
                     public void onSuccess(org.json.JSONObject data) {
-                        prefs.edit().putString("prayer_times_json", data.toString()).apply();
+                        String json = data.toString();
+                        String city = prefs.getString("prayer_city", "");
+                        PrayerUtils.savePrayerCache(context, city, lat, lon, json);
                         notifyPrayerWidget(context);
                     }
 
