@@ -11,15 +11,17 @@
 
 *The most customizable Islamic Android Widget. Full control over typography sizes, element colors, visibility toggles, prayer countdowns, and Hijri month grid.*
 
-[🎨 عالم التخصيص الكامل](#-عالم-التخصيص-الكامل--extreme-customization) • [📖 ماذا يقدم البرنامج؟](#-ماذا-يقدم-البرنامج--what-it-does) • [📱 الودجتات المتاحة](#-الودجتات-المتاحة--available-widgets) • [⚙️ المعمارية الفنية](#-المعمارية-الفنية--technical-architecture) • [🚀 طريقة التثبيت](#-طريقة-التثبيت-والبناء--how-to-build)
+[🇸🇦 العربية](#-النسخة-العربية) • [🇬🇧 English Version](#-english-version)
 
 </div>
 
 ---
 
-## 🎨 عالم التخصيص الكامل / Extreme Customization
+# 🇸🇦 النسخة العربية
 
-صُمم هذا التطبيق بمبدأ واحد: **"هاتفك.. ذوقك.. شاشتك"**. على عكس التطبيقات المغلقة التي تفرض عليك تصميماً ثابتاً، يتيح لك هذا التطبيق لوحة تحكم كاملة للتحكم في كل عنصر على حدة:
+## 🎨 عالم التخصيص الكامل (Extreme Customization)
+
+صُمم هذا التطبيق بمبدأ: **"هاتفك.. ذوقك.. شاشتك"**. على عكس التطبيقات التي تفرض عليك تصميماً ثابتاً، يتيح لك هذا التطبيق لوحة تحكم كاملة للتحكم في كل عنصر على حدة:
 
 ### 1️⃣ تخصيص ودجت الساعة والتقويم (Clock & Calendar Customization):
 - 👁️ **إظهار أو إخفاء أي عنصر (Visibility Toggles):**
@@ -81,86 +83,156 @@
 
 ---
 
-### 4️⃣ ميزة النسخ الاحتياطي واستعادة الثيمات (Backup & Restore):
-- 💾 **حفظ ثيماتك وإعداداتك:** هل قمت بتنسيق ألوان وأحجام خطوط تعجبك؟ يمكنك أخذ نسخة احتياطية من كل الإعدادات والتخصيصات بضغطة زر.
+### 4️⃣ النسخ الاحتياطي للثيمات والإعدادات (Backup & Restore):
+- 💾 **حفظ ثيماتك وإعداداتك:** يمكنك أخذ نسخة احتياطية من كل الإعدادات والتخصيصات بضغطة زر.
 - 📥 **استعادة فورية:** استعد إعداداتك متى شئت أو انقلها بسهولة عند تغيير هاتفك.
 
 ---
 
-## 📖 ماذا يقدم البرنامج وفكرته الأساسية؟ / What It Does
+## 📖 ماذا يقدم البرنامج وفكرته الأساسية؟
 
-بالإضافة للتخصيص الشامل، يقوم التطبيق بوظيفته الأساسية على أكمل وجه وبأعلى درجات الدقة والموثوقية:
-
-1. **نظرة واحدة تغنيك عن فتح التطبيقات:**
-   كل ما يحتاجه يومك كمسلم (الساعة، التاريخ الهجري اليومي، التاريخ الميلادي، وقت الصلاة القادمة، كم دقيقة بقيت، اسم مدينتك) حاضر أمامك في ودجت أنيق يتناغم مع خلفية هاتفك.
-2. **كشف السفر التلقائي (Smart Travel Detection):**
-   عند الانتقال أو السفر لمسافة تتجاوز 5 كم (مثل السفر من جدة إلى الرياض أو العكس)، يكتشف التطبيق تغير الإحداثيات، ويمسح الكاش فوراً، ويعيد حساب مواقيت الصلاة لمدينتك الجديدة دون أي تدخل يدوي منك.
-3. **محرك حساب فلكي مدمج (100% Offline):**
-   لا يتطلب التطبيق اتصالاً بالإنترنت لحساب مواقيت الصلاة أو التاريخ الهجري. الحسابات تتم محلياً بالكامل بدقة متناهية وفق مختلف الهيئات الفلكية (أم القرى، رابطة العالم الإسلامي، الهيئة العامة المصرية، إلخ).
-4. **تحديث فوري عند منتصف الليل:**
-   تمت هندسة التطبيق ليتغلب على قيود توفير الطاقة في أندرويد (Doze Mode)، حيث ينقل التاريخين الهجري والميلادي فور دخول الساعة 12:00 ليلاً بدقة ثانية.
+1. **نظرة واحدة تغنيك عن فتح التطبيقات:** الساعة، التاريخ الهجري اليومي، التاريخ الميلادي، وقت الصلاة القادمة، كم دقيقة بقيت، اسم مدينتك حاضر أمامك في ودجت متناسق.
+2. **كشف السفر التلقائي (Smart Travel Detection):** عند الانتقال لمسافة تتجاوز 5 كم، يكتشف التطبيق تغير الإحداثيات، ويمسح الكاش فوراً، ويعيد حساب مواقيت الصلاة لمدينتك الجديدة دون تدخل منك.
+3. **محرك حساب فلكي مدمج (100% Offline):** لا يتطلب اتصالاً بالإنترنت لحساب مواقيت الصلاة أو التاريخ الهجري؛ الحسابات تتم محلياً بالكامل.
+4. **تحديث فوري عند منتصف الليل:** ينقل التاريخين الهجري والميلادي فور دخول الساعة 12:00 ليلاً بدقة ثانية متغلباً على قيود البطارية (Doze Mode).
 
 ---
 
-## 📱 الودجتات المتاحة / Available Widgets
+## 📱 الودجتات المتاحة
 
 | الودجت | الحجم المقترح | الوصف ومحتويات العرض |
 | :--- | :---: | :--- |
-| **ودجت التقويم والساعة الرئيسية** | 4x2 أو 3x2 | الساعة الرقمية الكبيرة، التاريخ الهجري والميلادي، اسم اليوم، اسم المدينة، ودرجة الحرارة مع تحكم كامل بكل نص. |
+| **ودجت التقويم والساعة الرئيسية** | 4x2 أو 3x2 | الساعة الرقمية الكبيرة، التاريخ الهجري والميلادي، اسم اليوم، اسم المدينة، ودرجة الحرارة. |
 | **ودجت شريط الصلاة الأفقي** | 4x1 أو 5x1 | شريط يعرض الصلوات الخمس بالتوالي مع تمييز الصلاة القادمة والوقت المتبقي. |
 | **ودجت الصلاة الرأسي القائم** | 2x3 أو 2x4 | جدول رأسي يعرض مواقيت اليوم بالكامل مع أسماء الصلوات وحالتها. |
 | **ودجت الشهر الهجري الكامل** | 4x3 أو 4x4 | تقويم يعرض شبكة أيام الشهر الهجري كاملاً مع تمييز اليوم الحالي وأزرار تصفح الشهور. |
 
 ---
+---
 
-## ⚙️ المعمارية الفنية / Technical Architecture
+# 🇬🇧 English Version
 
-- **UI Framework:** Android AppWidget Framework (`RemoteViews`) متوافق مع Android 8.0 (API 26) وحتى Android 14+ (API 34).
-- **Calculation Engine:** محرك الحسابات الفلكية المعتمد والمدمج محلياً (`Offline Prayer Engine`) مع دعم خيارات فقهية (مذهب العصر الشافعي والحنفي).
-- **Location & Geofencing:** استخدام `LocationManager` مدمج مع معادلة حساب المسافة الجغرافية الكروية (Haversine Formula) لرصد حركة السفر بدقة 5 كم.
-- **Smart Cache:** نظام كاش ذكي (`CacheManager`) يفصل بين التاريخ، مواقيت الصلاة، والموقع لتسريع رسم الودجت بنسبة 100%.
+## 🎨 Extreme Customization
+
+Built around the philosophy: **"Your Phone.. Your Taste.. Your Screen"**. Unlike rigid apps that enforce a fixed layout, this app gives you a comprehensive dashboard to configure every single visual element:
+
+### 1️⃣ Clock & Calendar Widget Customization:
+- 👁️ **Full Visibility Toggles:**
+  - Show / Hide Digital Clock.
+  - Show / Hide Hijri Date.
+  - Show / Hide Gregorian Date.
+  - Show / Hide Current City Name.
+  - Show / Hide Temperature & Weather.
+  - Show / Hide Date Suffixes (**H** for Hijri & **G** for Gregorian).
+- 🔤 **Independent Font Sizing:**
+  - 5 carefully calibrated font sizes for the digital clock (from compact to bold giant).
+  - Independent font size slider for the Hijri date.
+  - Independent font size slider for the Gregorian date.
+  - Option to enable prominent Large Time Labels.
+- 🎨 **Individual Color Engine:**
+  - Custom color for clock digits.
+  - Custom color for Hijri date text.
+  - Custom color for Gregorian date text.
+  - Custom color for day name label (e.g. Monday / الاثنين).
+- 📆 **Day Label Layout & Positioning:**
+  - Display day name **Horizontally** or **Vertically stacked**.
+  - Position day label on the **Right** or **Left** side of the clock.
+  - Language: Arabic, English, or **Both simultaneously**.
+- 🕒 **Time & Number Formats:**
+  - Switch between 12-hour and 24-hour time format.
+  - AM/PM indicator in Arabic (ص / م) or English (AM / PM).
+  - Instant toggle between Eastern Arabic-Indic numerals (١، ٢، ٣) and Western digits (1, 2, 3).
+- 🖼️ **Widget Background Styles:**
+  - 100% Fully Transparent to blend seamlessly with your wallpaper.
+  - Deep AMOLED solid black for maximum battery savings.
+  - Frosted translucent glass (Dark / Light) or solid crisp white.
 
 ---
 
-## 🚀 طريقة التثبيت والبناء / How to Build
+### 2️⃣ Prayer Times Widget Customization:
+- 🎛️ **Multiple Layout Modes:**
+  - **Horizontal Grid:** Compact strip showing all 5 daily prayers with the active prayer highlighted.
+  - **Vertical List:** Elegant vertical column ideal for large screens and home screen side docks.
+  - **Next Prayer Only:** A prominent focus card showing only the upcoming prayer, its time, and remaining minutes.
+  - **Remaining Countdown Only:** Ultra-minimalist single line displaying the time left until Adhan.
+- 👁️ **Visibility Controls:**
+  - Toggle Sunrise (Shuruq) visibility on/off.
+  - Toggle prayer time digits on/off (names only mode).
+  - Toggle integrated clock inside the prayer widget.
+- 🌟 **Active Prayer Highlighting:**
+  - Golden Solid background or elegant Golden Stroke outline.
+  - White, Red, or Teal accent strokes.
+  - Automatic **Adhan Alert Window**: highlights active prayer in vibrant red from 5 mins before until 20 mins after Adhan.
+- 📐 **Custom Font Sizes:** Discrete size controls for prayer names and prayer time numbers.
+- 🪟 **Widget Card Styles:** Premium Glassmorphism, smooth Gradients, Transparent, or Solid colors.
 
-### المتطلبات الأساسية:
-- **Android Studio** (Hedgehog أو أحدث)
-- **JDK 17** أو JDK 11
-- **Android SDK:** API 26+ (Target: API 34)
+---
 
-### خطوات البناء:
+### 3️⃣ Full Hijri Month Calendar Widget:
+- 📅 **Complete Monthly Grid:** Displays all days of the current Hijri month with current day indicator.
+- 🔄 **In-Widget Navigation:** Previous/Next month navigation buttons right on your home screen.
+- 🕌 **Friday Highlight:** Special visual accent for Fridays and month beginnings.
+- 🎨 **Full Color Customization:** Customize header, week numbers, and selected day colors.
+
+---
+
+### 4️⃣ Backup & Theme Restore:
+- 💾 **Export Settings:** Save your favorite colors, font sizes, and layout configurations in one tap.
+- 📥 **Instant Restore:** Easily restore your setup or transfer it across different devices.
+
+---
+
+## 📖 What It Does & Core Value
+
+1. **Everything At A Glance:** Clock, Hijri & Gregorian dates, upcoming prayer, countdown timer, and current city — all without ever opening an app.
+2. **Smart Travel Detection:** When moving > 5 km (e.g. traveling between cities), it detects coordinate changes, invalidates stale cache, and recalculates local prayer times automatically.
+3. **100% Offline Astronomical Engine:** No internet needed for prayer calculations or calendar conversion; runs locally with zero delay.
+4. **Guaranteed Midnight Rollover:** Engineered to overcome Android Doze mode, rolling over Hijri and Gregorian dates right at 00:00:00 every night.
+
+---
+
+## 📱 Available Widgets
+
+| Widget | Recommended Size | Content & Description |
+| :--- | :---: | :--- |
+| **Main Clock & Calendar Widget** | 4x2 or 3x2 | Large digital clock, Hijri/Gregorian dates, day name, city, and temperature. |
+| **Horizontal Prayer Strip** | 4x1 or 5x1 | Compact horizontal bar displaying all 5 prayers + countdown. |
+| **Vertical Prayer List** | 2x3 or 2x4 | Detailed vertical schedule of today's prayer times and statuses. |
+| **Full Hijri Month View** | 4x3 or 4x4 | Interactive monthly grid with next/prev month navigation. |
+
+---
+
+## ⚙️ Technical Architecture
+
+- **UI Framework:** Android AppWidget Framework (`RemoteViews`) supporting Android 8.0 (API 26) through Android 14+ (API 34).
+- **Calculation Engine:** High-precision offline astronomical algorithms supporting Umm Al-Qura, Muslim World League, Egyptian Authority, Karachi, and more (with Shafii/Hanafi Asr methods).
+- **Location & Geofencing:** `LocationManager` coupled with spherical Haversine formula for 5 km travel detection.
+- **Smart Cache:** Multi-tier `CacheManager` separating dates, coordinates, and prayer data for instantaneous widget render.
+
+---
+
+## 🚀 How to Build
+
 ```bash
-# 1. استنساخ المستودع
+# 1. Clone repository
 git clone https://github.com/rakuda99/Hijri-Calendar-Widget.git
 cd Hijri-Calendar-Widget
 
-# 2. بناء ملف التجربة (Debug APK)
+# 2. Build Debug APK
 ./gradlew assembleDebug
 
-# 3. التثبيت المباشر على الهاتف المتصل عبر ADB
+# 3. Install directly to connected device
 ./gradlew installDebug
 ```
 
 ---
 
-## 🤝 المساهمة / Contributing
+## 📄 License
 
-المشروع مفتوح المصدر ونرحب بمساهمات المطورين لتحسين الأداء أو إضافة تصاميم وثيمات جديدة:
-1. اعمل **Fork** للمستودع.
-2. أنشئ فرع جديد: `git checkout -b feature/new-improvement`
-3. احفظ التعديلات: `git commit -m "feat: Add feature"`
-4. ارفع الفرع: `git push origin feature/new-improvement`
-5. افتح **Pull Request**.
-
----
-
-## 📄 الرخصة / License
-
-هذا المشروع مرخص تحت رخصة **MIT License** — طالع ملف [LICENSE](LICENSE) لمزيد من التفاصيل.
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ---
 
 <div align="center">
-صُنع بإتقان و ❤️ لخدمة المستخدمين حول العالم
+صُنع بإتقان و ❤️ لخدمة المستخدمين حول العالم | Crafted with ❤️ for users worldwide
 </div>
