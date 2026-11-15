@@ -38,6 +38,20 @@ public class HijriMonthWidget extends AppWidgetProvider {
 
             super.onReceive(context, intent);
 
+            // Refresh all month widget instances on date/time/boot changes
+            if (android.content.Intent.ACTION_DATE_CHANGED.equals(action)
+                    || android.content.Intent.ACTION_TIME_CHANGED.equals(action)
+                    || android.content.Intent.ACTION_TIMEZONE_CHANGED.equals(action)
+                    || android.content.Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+                AppWidgetManager mgr = AppWidgetManager.getInstance(context);
+                int[] ids = mgr.getAppWidgetIds(
+                        new android.content.ComponentName(context, HijriMonthWidget.class));
+                if (ids != null && ids.length > 0) {
+                    onUpdate(context, mgr, ids);
+                }
+                return;
+            }
+
             if (ACTION_CLICK.equals(action)) {
                 long currentClickTime = System.currentTimeMillis();
                 if (currentClickTime - lastClickTime < 500) {
@@ -73,7 +87,14 @@ public class HijriMonthWidget extends AppWidgetProvider {
 
     void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         try {
+            // Defense-in-depth: validate date before rendering month widget.
             SharedPreferences mainPrefs = context.getSharedPreferences("HijriWidgetPrefs", Context.MODE_PRIVATE);
+            String cachedDate = mainPrefs.getString(CacheManager.KEY_CACHE_DATE, null);
+            if (cachedDate == null || !cachedDate.equals(CacheManager.todayCacheKey())) {
+                PrayerUtils.refreshPrayerTimesIfNewDay(context);
+                HijriDateUtils.refreshAllWidgetsNow(context);
+                CacheManager.touchWidgetUpdate(context);
+            }
             int orientation = mainPrefs.getInt("month_orientation", 0);
             int layoutId = (orientation == 1) ? R.layout.widget_month_calendar_vertical
                     : R.layout.widget_month_calendar;

@@ -46,6 +46,7 @@ public class HijriCalendarWidget extends AppWidgetProvider {
     }
 
     private static final String ACTION_DOUBLE_CLICK_CHECK = "com.example.hijricalendarwidget.ACTION_DOUBLE_CLICK_CHECK";
+    private static final String ACTION_REFRESH_LOCATION = "com.example.hijricalendarwidget.ACTION_REFRESH_LOCATION";
     private static final String PREFS_NAME = "HijriWidgetPrefs";
     private static final String PREF_LAST_CLICK_TIME = "last_click_time";
     private static final long DOUBLE_CLICK_THRESHOLD = 500;
@@ -65,8 +66,9 @@ public class HijriCalendarWidget extends AppWidgetProvider {
             // React to midnight / time-change events — refresh all widget instances immediately
             if (android.content.Intent.ACTION_DATE_CHANGED.equals(action)
                     || android.content.Intent.ACTION_TIME_CHANGED.equals(action)
-                    || android.content.Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
-                forceUpdateAllWidgets(context);
+                    || android.content.Intent.ACTION_TIMEZONE_CHANGED.equals(action)
+                    || android.content.Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+                HijriDateUtils.refreshAllWidgetsNow(context);
                 // Also reschedule midnight alarm in case timezone flipped
                 HijriDateUtils.scheduleMidnightAlarm(context);
                 return;
@@ -83,22 +85,13 @@ public class HijriCalendarWidget extends AppWidgetProvider {
                     lastClickTime = currentClickTime;
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    /** Force all active HijriCalendarWidget instances to redraw with the current date. */
-    static void forceUpdateAllWidgets(Context context) {
-        try {
-            AppWidgetManager mgr = AppWidgetManager.getInstance(context);
-            int[] ids = mgr.getAppWidgetIds(
-                    new android.content.ComponentName(context, HijriCalendarWidget.class));
-            if (ids != null && ids.length > 0) {
-                Intent updateIntent = new Intent(context, HijriCalendarWidget.class);
-                updateIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-                updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-                context.sendBroadcast(updateIntent);
+            if (ACTION_REFRESH_LOCATION.equals(action)) {
+                android.util.Log.i("LocationRefresh", "City/temperature row tapped by user");
+                // Wipe the stale location/prayer cache first so the next sync cannot
+                // short-circuit on the old city, then ask for a fresh fix.
+                HijriDateUtils.invalidateLocationAndPrayerCache(context);
+                LocationService.refreshLocationFromUserTap(context);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -120,6 +113,15 @@ public class HijriCalendarWidget extends AppWidgetProvider {
 
     protected void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId, int layoutId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
+        // Defense-in-depth: validate date before rendering. If date rolled over while device
+        // was off, refresh all widgets first so Hijri/Gregorian dates and prayer times are correct.
+        String cachedDate = prefs.getString(CacheManager.KEY_CACHE_DATE, null);
+        if (cachedDate == null || !cachedDate.equals(CacheManager.todayCacheKey())) {
+            PrayerUtils.refreshPrayerTimesIfNewDay(context);
+            HijriDateUtils.refreshAllWidgetsNow(context);
+            CacheManager.touchWidgetUpdate(context);
+        }
 
         String langStr = prefs.getString("language", "auto");
         int clockColor = prefs.getInt("clock_color", 0xFFFFFFFF);
@@ -205,9 +207,6 @@ public class HijriCalendarWidget extends AppWidgetProvider {
         int llRightNorm = R.id.ll_day_right_normal;
         int llRightRot = R.id.ll_day_right_rotated;
 
-        // Hide the separate bottom line day completely, we won't use it anymore
-        views.setViewVisibility(R.id.day_horizontal_text, View.GONE);
-
         // Clock Visibility
         int clockVisibility = showClockVis ? View.VISIBLE : View.GONE;
         views.setViewVisibility(R.id.clock_text, clockVisibility);
@@ -243,9 +242,7 @@ public class HijriCalendarWidget extends AppWidgetProvider {
         views.setTextColor(R.id.day_english_rotated, dayColor);
         views.setTextColor(R.id.day_arabic_rotated_left, dayColor);
         views.setTextColor(R.id.day_english_rotated_left, dayColor);
-        views.setTextColor(R.id.day_horizontal_text, dayColor);
 
-        float baseLabelSize = largeTimeLabels ? (clockSize * 0.35f) : 14f;
         float ampmSize = largeTimeLabels ? (clockSize * 0.35f) : (float) (gregSize * 0.8f);
 
         views.setTextViewTextSize(R.id.clock_text, android.util.TypedValue.COMPLEX_UNIT_SP, clockSize);
@@ -253,55 +250,63 @@ public class HijriCalendarWidget extends AppWidgetProvider {
         views.setTextViewTextSize(R.id.hijri_date_text, android.util.TypedValue.COMPLEX_UNIT_SP, hijriSize);
         views.setTextViewTextSize(R.id.gregorian_date_text, android.util.TypedValue.COMPLEX_UNIT_SP, gregSize);
 
-        int[] dayIds = {
-            R.id.day_arabic_text, R.id.day_english_text,
-            R.id.day_arabic_text_left, R.id.day_english_text_left,
-            R.id.day_arabic_rotated, R.id.day_english_rotated,
-            R.id.day_arabic_rotated_left, R.id.day_english_rotated_left,
-            R.id.day_horizontal_text
-        };
-        for (int id : dayIds) {
-            views.setTextViewTextSize(id, android.util.TypedValue.COMPLEX_UNIT_SP, baseLabelSize);
-        }
-
         // Day Labels Logic
         SimpleDateFormat dayFormatEn = new SimpleDateFormat("EEE", Locale.ENGLISH);
         String[] arDays = {"", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"};
         String arDayStr = arDays[cal.get(Calendar.DAY_OF_WEEK)];
 
+        float dayLabelSize = largeTimeLabels ? (clockSize * 0.35f) : 14f;
+        if (showDayArabic && arDayStr != null) {
+            int arLen = arDayStr.length();
+            if (arLen >= 8)
+                dayLabelSize *= 0.82f;
+            else if (arLen >= 6)
+                dayLabelSize *= 0.90f;
+        }
+        try {
+            android.os.Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
+            if (options != null) {
+                int widthDp = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0);
+                if (widthDp > 0) {
+                    if (widthDp < 180)
+                        dayLabelSize *= 0.80f;
+                    else if (widthDp < 250)
+                        dayLabelSize *= 0.90f;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        int[] dayIds = {
+            R.id.day_arabic_text, R.id.day_english_text,
+            R.id.day_arabic_text_left, R.id.day_english_text_left,
+            R.id.day_arabic_rotated, R.id.day_english_rotated,
+            R.id.day_arabic_rotated_left, R.id.day_english_rotated_left
+        };
+        for (int id : dayIds) {
+            views.setTextViewTextSize(id, android.util.TypedValue.COMPLEX_UNIT_SP, dayLabelSize);
+        }
+
         if (isHorizontal) { // Normal stacked mode (Horizontal unrotated)
             int llNorm = dayTextLeft ? llLeftNorm : llRightNorm;
-            views.setViewVisibility(llNorm, (showDayArabic || showDayEnglish) ? View.VISIBLE : View.GONE);
+            boolean showEnNorm = showDayEnglish && !showDayArabic;
+            views.setViewVisibility(llNorm, (showDayArabic || showEnNorm) ? View.VISIBLE : View.GONE);
             views.setViewVisibility(arIdNorm, showDayArabic ? View.VISIBLE : View.GONE);
-            views.setViewVisibility(enIdNorm, showDayEnglish ? View.VISIBLE : View.GONE);
+            views.setViewVisibility(enIdNorm, showEnNorm ? View.VISIBLE : View.GONE);
             if (showDayArabic)
                 views.setTextViewText(arIdNorm, arDayStr);
-            if (showDayEnglish)
+            if (showEnNorm)
                 views.setTextViewText(enIdNorm, dayFormatEn.format(cal.getTime()));
-        } else { // Rotated mode (Vertical)
-            // If they want BOTH, split them: English Left, Arabic Right
-            if (showDayEnglish && showDayArabic) {
-                views.setViewVisibility(llLeftRot, View.VISIBLE);
-                views.setViewVisibility(llRightRot, View.VISIBLE);
-
-                views.setViewVisibility(R.id.day_english_rotated_left, View.VISIBLE);
-                views.setViewVisibility(R.id.day_arabic_rotated_left, View.GONE);
-                views.setTextViewText(R.id.day_english_rotated_left, dayFormatEn.format(cal.getTime()));
-
-                views.setViewVisibility(R.id.day_arabic_rotated, View.VISIBLE);
-                views.setViewVisibility(R.id.day_english_rotated, View.GONE);
-                views.setTextViewText(R.id.day_arabic_rotated, arDayStr);
-            } else {
-                // Otherwise respect the Left switch position
-                int llRot = dayTextLeft ? llLeftRot : llRightRot;
-                views.setViewVisibility(llRot, View.VISIBLE);
-                views.setViewVisibility(arIdRot, showDayArabic ? View.VISIBLE : View.GONE);
-                views.setViewVisibility(enIdRot, showDayEnglish ? View.VISIBLE : View.GONE);
-                if (showDayArabic)
-                    views.setTextViewText(arIdRot, arDayStr);
-                if (showDayEnglish)
-                    views.setTextViewText(enIdRot, dayFormatEn.format(cal.getTime()));
-            }
+        } else {
+            boolean showEnRot = showDayEnglish && !showDayArabic;
+            int llRot = dayTextLeft ? llLeftRot : llRightRot;
+            views.setViewVisibility(llRot, (showDayArabic || showEnRot) ? View.VISIBLE : View.GONE);
+            views.setViewVisibility(arIdRot, showDayArabic ? View.VISIBLE : View.GONE);
+            views.setViewVisibility(enIdRot, showEnRot ? View.VISIBLE : View.GONE);
+            if (showDayArabic)
+                views.setTextViewText(arIdRot, arDayStr);
+            if (showEnRot)
+                views.setTextViewText(enIdRot, dayFormatEn.format(cal.getTime()));
         }
 
         // Clock Pattern
@@ -394,6 +399,56 @@ public class HijriCalendarWidget extends AppWidgetProvider {
         }
         views.setTextViewText(R.id.hijri_date_text, HijriDateUtils.localizeDigits(hijriStr, digitStyle));
 
+        // City name beneath clock
+        boolean showCity = prefs.getBoolean("show_city_name", true);
+        String city = CacheManager.getCacheCity(context);
+        android.util.Log.d("CityDebug", "Widget render: showCity=" + showCity + " city=" + city);
+
+        // Emergency fallback: if the city is missing, recalculate prayer times so the widget has
+        // something to render. The placeholder city is NOT persisted: writing "Riyadh" here would
+        // overwrite a real city until the next successful location fix.
+        if (showCity && (city == null || city.isEmpty())) {
+            android.util.Log.d("CityDebug", "City missing — synchronous calculation");
+            try {
+                double calcLat = CacheManager.getCacheLat(context);
+                double calcLon = CacheManager.getCacheLon(context);
+                if (calcLat == 0 && calcLon == 0) {
+                    calcLat = PrayerUtils.DEFAULT_LAT;
+                    calcLon = PrayerUtils.DEFAULT_LON;
+                }
+                String newJson = PrayerUtils.buildTimingsJson(
+                        PrayerUtils.calculateToday(context, calcLat, calcLon)).toString();
+                // Keep the city unknown rather than inventing one: a placeholder would be
+                // persisted and would hide the real city until the next location fix.
+                CacheManager.savePrayerCache(context, city, calcLat, calcLon, newJson);
+                CacheManager.touchWidgetUpdate(context);
+                city = CacheManager.getCacheCity(context);
+                android.util.Log.d("CityDebug", "Sync calculation complete — city=" + city);
+            } catch (Exception e) {
+                android.util.Log.d("CityDebug", "Sync calculation failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        boolean cityVisible = showCity && city != null && !city.isEmpty();
+        views.setViewVisibility(R.id.city_text, cityVisible ? View.VISIBLE : View.GONE);
+        views.setViewVisibility(R.id.city_temp_sep,
+                (cityVisible && showTemperature) ? View.VISIBLE : View.GONE);
+        views.setViewVisibility(R.id.city_temp_row,
+                (cityVisible || showTemperature) ? View.VISIBLE : View.GONE);
+
+        if (cityVisible) {
+            views.setTextViewText(R.id.city_text, "📍 " + city);
+
+            float dateShrink = 0.90f;
+            views.setTextViewTextSize(R.id.hijri_date_text, android.util.TypedValue.COMPLEX_UNIT_SP,
+                    hijriSize * dateShrink);
+            views.setTextViewTextSize(R.id.gregorian_date_text, android.util.TypedValue.COMPLEX_UNIT_SP,
+                    gregSize * dateShrink);
+            views.setViewPadding(R.id.hijri_date_text, 0, 0, 0, dpToPx(context, 1));
+            views.setViewPadding(R.id.gregorian_date_text, 0, 0, 0, dpToPx(context, 1));
+        }
+
         // Click action: Double Click to Sub-Settings / Hub
         Intent intent = new Intent(context, HijriCalendarWidget.class);
         intent.setAction(ACTION_DOUBLE_CLICK_CHECK);
@@ -402,6 +457,17 @@ public class HijriCalendarWidget extends AppWidgetProvider {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         views.setOnClickPendingIntent(R.id.widget_root, pendingIntent);
 
+        Intent refreshIntent = new Intent(context, HijriCalendarWidget.class);
+        refreshIntent.setAction(ACTION_REFRESH_LOCATION);
+        refreshIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+        PendingIntent refreshPendingIntent = PendingIntent.getBroadcast(context, appWidgetId + 1,
+                refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        views.setOnClickPendingIntent(R.id.city_temp_row, refreshPendingIntent);
+
         appWidgetManager.updateAppWidget(appWidgetId, views);
+    }
+
+    private static int dpToPx(Context context, float dp) {
+        return (int) (dp * context.getResources().getDisplayMetrics().density + 0.5f);
     }
 }

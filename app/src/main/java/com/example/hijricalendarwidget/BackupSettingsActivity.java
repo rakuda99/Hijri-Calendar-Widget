@@ -1,9 +1,7 @@
 package com.example.hijricalendarwidget;
 
-import android.appwidget.AppWidgetManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;

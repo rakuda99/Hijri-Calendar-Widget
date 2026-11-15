@@ -266,8 +266,11 @@ public class SettingsActivity extends AppCompatActivity {
                 PrayerUtils.fetchPrayerTimes(this, new PrayerUtils.PrayerCallback() {
                         @Override
                         public void onSuccess(org.json.JSONObject data) {
-                                getSharedPreferences("HijriWidgetPrefs", MODE_PRIVATE)
-                                                .edit().putString("prayer_times_json", data.toString()).apply();
+                                CacheManager.savePrayerCache(SettingsActivity.this,
+                                        CacheManager.getCacheCity(SettingsActivity.this),
+                                        CacheManager.getCacheLat(SettingsActivity.this),
+                                        CacheManager.getCacheLon(SettingsActivity.this),
+                                        data.toString());
 
                                 Intent prayerIntent = new Intent(SettingsActivity.this, PrayerWidgetProvider.class);
                                 prayerIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);

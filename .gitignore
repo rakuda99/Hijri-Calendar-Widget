@@ -64,6 +64,9 @@ keystore.properties
 .env.local
 .env.*.local
 
+# Internal tools & agents
+.kilo/
+
 # OS files
 Thumbs.db
 desktop.ini

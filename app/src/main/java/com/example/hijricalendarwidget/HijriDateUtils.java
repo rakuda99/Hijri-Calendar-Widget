@@ -130,9 +130,9 @@ public class HijriDateUtils {
                             @Override
                             public void onSuccess(org.json.JSONObject data) {
                                 String json = data.toString();
-                                float lat = prefs.getFloat("last_lat", 0);
-                                float lon = prefs.getFloat("last_lon", 0);
-                                String city = prefs.getString("prayer_city", "");
+                                float lat = (float) CacheManager.getCacheLat(context);
+                                float lon = (float) CacheManager.getCacheLon(context);
+                                String city = CacheManager.getCacheCity(context);
                                 CacheManager.savePrayerCache(context, city, lat, lon, json);
                                 notifyPrayerWidget(context);
                             }
@@ -421,13 +421,13 @@ public class HijriDateUtils {
         LocationUtils.getCurrentLocation(context, new LocationUtils.LocationCallback() {
             @Override
             public void onLocationFound(double lat, double lon) {
-                prefs.edit().putFloat("last_lat", (float) lat).putFloat("last_lon", (float) lon).apply();
+                CacheManager.saveLastKnownLocation(context, lat, lon);
                 WeatherUtils.fetchWeather(context, lat, lon);
                 PrayerUtils.fetchPrayerTimes(context, lat, lon, new PrayerUtils.PrayerCallback() {
                     @Override
                     public void onSuccess(org.json.JSONObject data) {
                         String json = data.toString();
-                        String city = prefs.getString("prayer_city", "");
+                        String city = CacheManager.getCacheCity(context);
                         PrayerUtils.savePrayerCache(context, city, lat, lon, json);
                         notifyPrayerWidget(context);
                     }

@@ -156,8 +156,8 @@ public class WeatherUtils {
             LocationUtils.getCurrentLocation(context, new LocationUtils.LocationCallback() {
                 @Override
                 public void onLocationFound(double lat, double lon) {
-                    // Update last known lat/lon in prefs
-                    prefs.edit().putFloat("last_lat", (float) lat).putFloat("last_lon", (float) lon).apply();
+                    // Update last known lat/lon in the single coordinate store
+                    CacheManager.saveLastKnownLocation(context, lat, lon);
                     fetchWeather(context, lat, lon);
                 }
 
@@ -165,25 +165,25 @@ public class WeatherUtils {
                 public void onError(String msg) {
                     Log.e("WeatherUtils", "Location error: " + msg);
                     // Fallback to last known lat/lon if GPS fails
-                    float lastLat = prefs.getFloat("last_lat", 0.0f);
-                    float lastLon = prefs.getFloat("last_lon", 0.0f);
+                    float lastLat = (float) CacheManager.getCacheLat(context);
+                    float lastLon = (float) CacheManager.getCacheLon(context);
                     if (lastLat != 0.0f || lastLon != 0.0f) {
                         fetchWeather(context, lastLat, lastLon);
                     } else {
                         // Fallback to Riyadh if no last known location
-                        fetchWeather(context, 24.7136, 46.6753);
+                        fetchWeather(context, PrayerUtils.DEFAULT_LAT, PrayerUtils.DEFAULT_LON);
                     }
                 }
             });
         } else {
             Log.w("WeatherUtils", "Location permission not granted for weather update. Using fallback.");
             // If no permission, use last known location or Riyadh as fallback
-            float lastLat = prefs.getFloat("last_lat", 0.0f);
-            float lastLon = prefs.getFloat("last_lon", 0.0f);
+            float lastLat = (float) CacheManager.getCacheLat(context);
+            float lastLon = (float) CacheManager.getCacheLon(context);
             if (lastLat != 0.0f || lastLon != 0.0f) {
                 fetchWeather(context, lastLat, lastLon);
             } else {
-                fetchWeather(context, 24.7136, 46.6753);
+                fetchWeather(context, PrayerUtils.DEFAULT_LAT, PrayerUtils.DEFAULT_LON);
             }
         }
     }

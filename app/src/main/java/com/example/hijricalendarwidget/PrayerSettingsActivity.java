@@ -6,8 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
@@ -183,6 +183,33 @@ public class PrayerSettingsActivity extends AppCompatActivity {
 
         spinnerCalcMethod.setSelection(prefs.getInt("prayer_calc_method", 0));
         spinnerAsrJuristic.setSelection(prefs.getInt("prayer_asr_juristic", 0));
+
+        // Display sync timestamps
+        TextView txtPrayerSync = findViewById(R.id.txt_last_prayer_sync);
+        TextView txtLocationSync = findViewById(R.id.txt_last_location_sync);
+        long prayerMs = CacheManager.getLastPrayerUpdateMs(this);
+        long locationMs = CacheManager.getLastLocationUpdateMs(this);
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm dd/MM", java.util.Locale.getDefault());
+        if (prayerMs > 0) {
+            txtPrayerSync.setText("Last Prayer Sync: " + sdf.format(prayerMs));
+        } else {
+            txtPrayerSync.setText("Last Prayer Sync: --");
+        }
+        if (locationMs > 0) {
+            long now = System.currentTimeMillis();
+            long diffMin = (now - locationMs) / (1000 * 60);
+            if (diffMin < 1) {
+                txtLocationSync.setText("Updated: just now");
+            } else if (diffMin < 60) {
+                txtLocationSync.setText("Updated: " + diffMin + " min ago");
+            } else if (diffMin < 1440) {
+                txtLocationSync.setText("Updated: " + (diffMin / 60) + " hours ago");
+            } else {
+                txtLocationSync.setText("Updated: " + sdf.format(locationMs));
+            }
+        } else {
+            txtLocationSync.setText("Updated: --");
+        }
     }
 
     private void applyLanguage() {
@@ -318,14 +345,26 @@ public class PrayerSettingsActivity extends AppCompatActivity {
 
     private void syncLocation() {
         Toast.makeText(this, "Getting location...", Toast.LENGTH_SHORT).show();
-        LocationUtils.getCurrentLocation(this, new LocationUtils.LocationCallback() {
+        LocationService.checkLocationAndUpdate(this, new LocationService.LocationResultCallback() {
             @Override
-            public void onLocationFound(double lat, double lon) {
-                saveLocation(lat, lon);
+            public void onLocationUpdated(double lat, double lon, String city, boolean cacheInvalidated,
+                                          String previousCity, float distanceKm) {
                 runOnUiThread(() -> {
-                    Toast.makeText(PrayerSettingsActivity.this, "Location found! Fetching times...", Toast.LENGTH_SHORT)
-                            .show();
-                    updateWidgetNowWithLocation(lat, lon);
+                    if (cacheInvalidated) {
+                        String cityChangeMsg = "Location updated: ";
+                        if (previousCity != null && !previousCity.isEmpty() && !previousCity.equals(city)) {
+                            cityChangeMsg += previousCity + " → " + city;
+                        } else {
+                            cityChangeMsg += city;
+                        }
+                        cityChangeMsg += " — prayer times recalculated (" + String.format("%.1f", distanceKm) + " km) ✅";
+                        Toast.makeText(PrayerSettingsActivity.this,
+                                cityChangeMsg, Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(PrayerSettingsActivity.this,
+                                "Location unchanged: " + city, Toast.LENGTH_SHORT).show();
+                    }
+                    loadPreferences(); // refresh timestamps display
                 });
             }
 
@@ -337,47 +376,17 @@ public class PrayerSettingsActivity extends AppCompatActivity {
         });
     }
 
-    private void saveLocation(double lat, double lon) {
-        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-                .putFloat("last_lat", (float) lat)
-                .putFloat("last_lon", (float) lon)
-                .apply();
-    }
-
-    private void updateWidgetNowWithLocation(double lat, double lon) {
-        PrayerUtils.fetchPrayerTimes(this, lat, lon, new PrayerUtils.PrayerCallback() {
-            @Override
-            public void onSuccess(JSONObject data) {
-                runOnUiThread(() -> {
-                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-                            .putString("prayer_times_json", data.toString()).apply();
-
-                    Intent intent = new Intent(PrayerSettingsActivity.this, PrayerWidgetProvider.class);
-                    intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-                    int[] ids = AppWidgetManager.getInstance(getApplication())
-                            .getAppWidgetIds(new ComponentName(getApplication(), PrayerWidgetProvider.class));
-                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-                    sendBroadcast(intent);
-                    Toast.makeText(PrayerSettingsActivity.this, "Updated successfully! ✅", Toast.LENGTH_SHORT).show();
-                });
-            }
-
-            @Override
-            public void onError(Exception e) {
-                runOnUiThread(() -> Toast
-                        .makeText(PrayerSettingsActivity.this, "Sync Error: " + e.getMessage(), Toast.LENGTH_SHORT)
-                        .show());
-            }
-        });
-    }
-
     private void updateWidgetNow() {
         PrayerUtils.fetchPrayerTimes(this, new PrayerUtils.PrayerCallback() {
             @Override
             public void onSuccess(JSONObject data) {
                 runOnUiThread(() -> {
                     SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                    prefs.edit().putString("prayer_times_json", data.toString()).apply();
+                    String json = data.toString();
+                    String city = CacheManager.getCacheCity(PrayerSettingsActivity.this);
+                    float lat = (float) CacheManager.getCacheLat(PrayerSettingsActivity.this);
+                    float lon = (float) CacheManager.getCacheLon(PrayerSettingsActivity.this);
+                    CacheManager.savePrayerCache(PrayerSettingsActivity.this, city, lat, lon, json);
 
                     Intent intent = new Intent(PrayerSettingsActivity.this, PrayerWidgetProvider.class);
                     intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);

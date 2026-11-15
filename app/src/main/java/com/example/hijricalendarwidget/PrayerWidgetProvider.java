@@ -26,7 +26,32 @@ public class PrayerWidgetProvider extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, android.content.Intent intent) {
         super.onReceive(context, intent);
-        if (ACTION_CLICK.equals(intent.getAction())) {
+        String action = intent.getAction();
+
+        // React to date/time/boot changes — validate cache and refresh prayer widget
+        if (android.content.Intent.ACTION_DATE_CHANGED.equals(action)
+                || android.content.Intent.ACTION_TIME_CHANGED.equals(action)
+                || android.content.Intent.ACTION_TIMEZONE_CHANGED.equals(action)
+                || android.content.Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+            double lat = CacheManager.getCacheLat(context);
+            double lon = CacheManager.getCacheLon(context);
+            String city = CacheManager.getCacheCity(context);
+            if (!CacheManager.isPrayerCacheValid(context, lat, lon, city)) {
+                PrayerUtils.refreshPrayerTimesIfNewDay(context);
+            }
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            int[] ids = appWidgetManager
+                    .getAppWidgetIds(new android.content.ComponentName(context, PrayerWidgetProvider.class));
+            if (ids != null && ids.length > 0) {
+                for (int id : ids) {
+                    updateAppWidget(context, appWidgetManager, id);
+                }
+            }
+            CacheManager.touchWidgetUpdate(context);
+            return;
+        }
+
+        if (ACTION_CLICK.equals(action)) {
             long currentClickTime = System.currentTimeMillis();
             if (currentClickTime - lastClickTime < 500) {
                 android.content.Intent launchIntent = new android.content.Intent(context, SettingsActivity.class);
@@ -51,8 +76,54 @@ public class PrayerWidgetProvider extends AppWidgetProvider {
     }
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+        // Validate prayer cache: date + city + coordinates (within 5 km).
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String json = prefs.getString("prayer_times_json", null);
+        double lat = CacheManager.getCacheLat(context);
+        double lon = CacheManager.getCacheLon(context);
+        String city = CacheManager.getCacheCity(context);
+
+        android.util.Log.d("PrayerDebug", "updateAppWidget: lat=" + lat + " lon=" + lon + " city=" + city);
+
+        if (!CacheManager.isPrayerCacheValid(context, lat, lon, city)) {
+            android.util.Log.d("PrayerDebug", "Cache invalid — synchronous recalculation before render");
+            // Cache stale (new day, moved city, or traveled > 5 km): recalculate SYNCHRONOUSLY
+            // before rendering so the widget never shows --:--.
+            try {
+                double calcLat = (lat != 0 && lon != 0) ? lat : PrayerUtils.DEFAULT_LAT;
+                double calcLon = (lat != 0 && lon != 0) ? lon : PrayerUtils.DEFAULT_LON;
+                String calcCity = (city != null && !city.isEmpty()) ? city : PrayerUtils.DEFAULT_CITY;
+                String newJson = PrayerUtils.buildTimingsJson(
+                        PrayerUtils.calculateToday(context, calcLat, calcLon)).toString();
+                CacheManager.savePrayerCache(context, calcCity, calcLat, calcLon, newJson);
+                CacheManager.touchWidgetUpdate(context);
+                android.util.Log.d("PrayerDebug", "Synchronous calculation complete — city=" + calcCity);
+            } catch (Exception e) {
+                android.util.Log.d("PrayerDebug", "Synchronous calculation failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            android.util.Log.d("PrayerDebug", "Cache valid — using cached prayer data");
+        }
+
+        String json = CacheManager.getCachedPrayerJson(context);
+        android.util.Log.d("PrayerDebug", "Prayer JSON for render: " + (json != null ? json.substring(0, Math.min(json.length(), 80)) : "null"));
+
+        // Emergency fallback: if cache is still empty, calculate immediately with default coordinates
+        if (json == null || json.isEmpty()) {
+            android.util.Log.d("PrayerDebug", "Emergency fallback: calculating prayer times immediately");
+            try {
+                String newJson = PrayerUtils.buildTimingsJson(PrayerUtils.calculateToday(
+                        context, PrayerUtils.DEFAULT_LAT, PrayerUtils.DEFAULT_LON)).toString();
+                CacheManager.savePrayerCache(context, PrayerUtils.DEFAULT_CITY,
+                        PrayerUtils.DEFAULT_LAT, PrayerUtils.DEFAULT_LON, newJson);
+                CacheManager.touchWidgetUpdate(context);
+                json = newJson;
+                android.util.Log.d("PrayerDebug", "Emergency fallback complete — json present");
+            } catch (Exception e) {
+                android.util.Log.d("PrayerDebug", "Emergency fallback failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
 
         String layoutMode = prefs.getString("prayer_layout_mode", "horizontal");
         String bgType = prefs.getString("prayer_bg_type", "transparent");
@@ -390,6 +461,8 @@ public class PrayerWidgetProvider extends AppWidgetProvider {
     private static void scheduleNextUpdate(Context context) {
         android.app.AlarmManager alarmManager = (android.app.AlarmManager) context
                 .getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager == null) return;
+
         android.content.Intent intent = new android.content.Intent(context, PrayerWidgetProvider.class);
         intent.setAction(ACTION_UPDATE_PRAYER_COUNTDOWN);
 
@@ -397,24 +470,17 @@ public class PrayerWidgetProvider extends AppWidgetProvider {
                 context, 0, intent,
                 android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE);
 
-        // Calculate time until start of next minute
-        long now = System.currentTimeMillis();
-        long nextMinute = (now / 60000 + 1) * 60000;
+        // One inexact repeating alarm drives every widget instance: updateAppWidget() is called per
+        // instance, so a single shared alarm avoids stacking an exact wakeup per widget. The
+        // countdown is minute-granular, so inexact delivery is acceptable and far kinder to battery.
+        long interval = 60_000L;
+        long triggerAt = (System.currentTimeMillis() / interval + 1) * interval;
 
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                if (alarmManager.canScheduleExactAlarms()) {
-                    alarmManager.setExact(android.app.AlarmManager.RTC_WAKEUP, nextMinute, pendingIntent);
-                } else {
-                    alarmManager.setWindow(android.app.AlarmManager.RTC_WAKEUP, nextMinute, 60000, pendingIntent);
-                }
-            } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                alarmManager.setExact(android.app.AlarmManager.RTC_WAKEUP, nextMinute, pendingIntent);
-            } else {
-                alarmManager.set(android.app.AlarmManager.RTC_WAKEUP, nextMinute, pendingIntent);
-            }
-        } catch (SecurityException e) {
-            alarmManager.set(android.app.AlarmManager.RTC_WAKEUP, nextMinute, pendingIntent);
+            alarmManager.setInexactRepeating(
+                    android.app.AlarmManager.RTC, triggerAt, interval, pendingIntent);
+        } catch (Exception e) {
+            android.util.Log.w("PrayerWidget", "Could not schedule countdown update", e);
         }
     }
 }

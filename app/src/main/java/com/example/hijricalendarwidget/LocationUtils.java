@@ -17,7 +17,7 @@ public class LocationUtils {
     private static final String PREFS_NAME = "HijriWidgetPrefs";
 
     /** Minimum distance (km) that triggers a full prayer-time + cache invalidation. */
-    public static final float SIGNIFICANT_MOVE_KM = 5.0f;
+    public static final float SIGNIFICANT_MOVE_KM = CacheManager.MAX_DISTANCE_KM;
 
     /** Max age for a cached location before we force a fresh GPS fix (regardless of distance). */
     private static final long MAX_LOCATION_AGE_MS = 15L * 60L * 1000L; // 15 minutes
@@ -50,21 +50,15 @@ public class LocationUtils {
      * re-fetch prayer times and weather for the new position.
      */
     public static void invalidateLocationAndPrayerCache(Context context) {
+        CacheManager.invalidatePrayerCache(context);
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit()
-            // Reset last_lat / last_lon so fetchPrayerTimes() knows nothing was cached
-            .remove("last_lat")
-            .remove("last_lon")
-            // Force the next syncTimeWithNetwork() call to bypass the 12-hour guard
             .putLong("last_network_sync", 0L)
-            // Remove stale prayer JSON so the widget shows "--" until new data arrives
-            .remove("prayer_times_json")
             .remove("prayer_times_date")
-            // Remove cached weather temperature
             .remove("current_temperature")
             .apply();
 
-        Log.i(TAG, "Location and prayer caches invalidated (significant move detected).");
+        Log.i(TAG, "Location and prayer caches invalidated.");
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -210,13 +204,12 @@ public class LocationUtils {
 
     /**
      * Returns {@code true} if the given coordinates are more than
-     * {@link #SIGNIFICANT_MOVE_KM} km from the last saved position.
+     * {@link CacheManager#MAX_DISTANCE_KM} km from the last saved position.
      * Returns {@code false} when no saved position exists (treat as "not moved").
      */
     public static boolean hasMovedSignificantly(Context context, double newLat, double newLon) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        float savedLat = prefs.getFloat("last_lat", 0f);
-        float savedLon = prefs.getFloat("last_lon", 0f);
+        float savedLat = (float) CacheManager.getCacheLat(context);
+        float savedLon = (float) CacheManager.getCacheLon(context);
 
         if (savedLat == 0f && savedLon == 0f) {
             // No saved location yet — treat as first run, not a move
@@ -224,8 +217,9 @@ public class LocationUtils {
         }
 
         float km = distanceKm(newLat, newLon, savedLat, savedLon);
-        Log.d(TAG, String.format("Distance from saved position: %.2f km (threshold: %.1f km)", km, SIGNIFICANT_MOVE_KM));
-        return km > SIGNIFICANT_MOVE_KM;
+        Log.d(TAG, String.format("Distance from saved position: %.2f km (threshold: %.1f km)",
+                km, CacheManager.MAX_DISTANCE_KM));
+        return km > CacheManager.MAX_DISTANCE_KM;
     }
 
     /**
@@ -252,11 +246,7 @@ public class LocationUtils {
             invalidateLocationAndPrayerCache(context);
 
             // 2. Save the new position immediately so the next check doesn't fire again
-            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                   .edit()
-                   .putFloat("last_lat", (float) lat)
-                   .putFloat("last_lon", (float) lon)
-                   .apply();
+            CacheManager.saveLastKnownLocation(context, lat, lon);
 
             // 3. Trigger a full widget refresh (prayer times + date)
             //    This runs on whatever thread called us; use a background thread

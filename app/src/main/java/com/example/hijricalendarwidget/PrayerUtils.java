@@ -1,15 +1,10 @@
 package com.example.hijricalendarwidget;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
+import android.content.SharedPreferences;
 import org.json.JSONObject;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
 public class PrayerUtils {
 
@@ -26,135 +21,176 @@ public class PrayerUtils {
         void onError(Exception e);
     }
 
+    /**
+     * Prayer cache preference keys. CacheManager is the single source of truth for these keys;
+     * these aliases exist only to keep the legacy call sites in this class readable.
+     */
+    private static final String PREF_CITY = CacheManager.KEY_PRAYER_CITY;
+
+    /** Fallback used when no location has been resolved yet (device default location). */
+    public static final String DEFAULT_CITY = "Riyadh";
+    public static final float DEFAULT_LAT = 24.7136f;
+    public static final float DEFAULT_LON = 46.6753f;
+
+    /** Returns today's date as a cache key (yyyy-MM-dd, local time zone). */
+    public static String todayCacheKey() {
+        return CacheManager.todayCacheKey();
+    }
+
+    /** Returns true when the cached prayer date matches today's date. */
+    public static boolean isPrayerCacheValid(android.content.Context context) {
+        android.content.SharedPreferences prefs = context.getSharedPreferences("HijriWidgetPrefs",
+                android.content.Context.MODE_PRIVATE);
+        String cached = prefs.getString(CacheManager.KEY_CACHE_DATE, null);
+        return cached != null && cached.equals(todayCacheKey());
+    }
+
+    /** Clears the prayer cache (date, city, coordinates, json). Delegates to CacheManager. */
+    public static void invalidatePrayerCache(android.content.Context context) {
+        CacheManager.invalidatePrayerCache(context);
+    }
+
+    /** Persists the prayer cache with today's date, city, coordinates, and json. */
+    public static void savePrayerCache(android.content.Context context, String city, double lat,
+                                       double lon, String json) {
+        CacheManager.savePrayerCache(context, city, lat, lon, json);
+    }
+
+    /** Returns the cached prayer times json, or null when absent. */
+    public static String getCachedPrayerJson(android.content.Context context) {
+        return CacheManager.getCachedPrayerJson(context);
+    }
+
+    /**
+     * Ensures the prayer cache is valid for the current day. When the cached date differs from
+     * today's date, the cache is invalidated, prayer times are recalculated, the cache is saved
+     * with the new date/city/coordinates, and widgets are refreshed.
+     */
+    public static void refreshPrayerTimesIfNewDay(final android.content.Context context) {
+        final String city = CacheManager.getCacheCity(context);
+        final float lat = (float) CacheManager.getCacheLat(context);
+        final float lon = (float) CacheManager.getCacheLon(context);
+
+        android.util.Log.d("PrayerDebug", "refreshPrayerTimesIfNewDay: city=" + city + " lat=" + lat + " lon=" + lon);
+
+        if (CacheManager.isPrayerCacheValid(context, lat, lon, city)) {
+            android.util.Log.d("PrayerDebug", "Cache valid — skipping recalculation");
+            return;
+        }
+
+        // Never persist an empty city: an empty cache city would make CacheManager.isPrayerCacheValid
+        // reject every later lookup and hide the city from the widget until the next location fix.
+        final String safeCity = (city != null && !city.isEmpty()) ? city : DEFAULT_CITY;
+
+        android.util.Log.d("PrayerDebug", "Cache invalid — recalculating prayer times");
+        CacheManager.invalidatePrayerCache(context);
+
+        final float useLat = (lat != 0 && lon != 0) ? lat : DEFAULT_LAT;
+        final float useLon = (lat != 0 && lon != 0) ? lon : DEFAULT_LON;
+
+        try {
+            JSONObject timings = buildTimingsJson(calculateToday(context, useLat, useLon));
+            CacheManager.savePrayerCache(context, safeCity, useLat, useLon, timings.toString());
+            android.util.Log.d("PrayerDebug", "Prayer cache saved for " + safeCity);
+            notifyPrayerWidget(context);
+        } catch (Exception e) {
+            android.util.Log.d("PrayerDebug", "onError: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static void notifyPrayerWidget(android.content.Context context) {
+        android.appwidget.AppWidgetManager appWidgetManager =
+                android.appwidget.AppWidgetManager.getInstance(context);
+        int[] prayerIds = appWidgetManager.getAppWidgetIds(
+                new android.content.ComponentName(context, PrayerWidgetProvider.class));
+        if (prayerIds.length > 0) {
+            android.content.Intent pIntent = new android.content.Intent(context,
+                    PrayerWidgetProvider.class);
+            pIntent.setAction(android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+            pIntent.putExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_IDS, prayerIds);
+            context.sendBroadcast(pIntent);
+        }
+    }
+
     public static void fetchPrayerTimes(Context context, double lat, double lon, PrayerCallback callback) {
         new Thread(() -> {
             try {
-                // http://api.aladhan.com/v1/timings?latitude=24.7136&longitude=46.6753&method=4
-                android.content.SharedPreferences prefs = context.getSharedPreferences("HijriWidgetPrefs", Context.MODE_PRIVATE);
-                int method = prefs.getInt("prayer_calc_method", 0);
-                // Map local PrayTime indices to Aladhan API method IDs if possible, or just use the local one
-                // For now, let's stick to the URL format but we could inject method here
-                int apiMethod = (method == 0) ? 4 : (method == 1 ? 3 : (method == 2 ? 2 : (method == 3 ? 5 : (method == 4 ? 1 : (method == 5 ? 7 : (method == 6 ? 0 : 4))))));
-                
-                String urlStr = String.format(Locale.US,
-                        "https://api.aladhan.com/v1/timings?latitude=%f&longitude=%f&method=%d", lat, lon, apiMethod);
-                java.net.URL url = new java.net.URL(urlStr);
-                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-                conn.setConnectTimeout(8000);
-                conn.setReadTimeout(8000);
-                conn.setRequestMethod("GET");
+                SharedPreferences prefs = context.getSharedPreferences("HijriWidgetPrefs", Context.MODE_PRIVATE);
+                int methodIdx = prefs.getInt("prayer_calc_method", 0);
+                int asrIdx = prefs.getInt("prayer_asr_juristic", 0);
 
-                if (conn.getResponseCode() == 200) {
-                    java.io.BufferedReader reader = new java.io.BufferedReader(
-                            new java.io.InputStreamReader(conn.getInputStream()));
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null)
-                        sb.append(line);
-                    reader.close();
+                PrayerService.CalcMethod method = PrayerService.INSTANCE.fromLegacyIndex(methodIdx);
+                com.batoulapps.adhan2.Madhab madhab =
+                        (asrIdx == 1)
+                                ? com.batoulapps.adhan2.Madhab.HANAFI
+                                : com.batoulapps.adhan2.Madhab.SHAFI;
 
-                    JSONObject response = new JSONObject(sb.toString());
-                    JSONObject data = response.getJSONObject("data");
-                    JSONObject timings = data.getJSONObject("timings");
+                Calendar cal = Calendar.getInstance();
+                int year = cal.get(Calendar.YEAR);
+                int month = cal.get(Calendar.MONTH) + 1;
+                int day = cal.get(Calendar.DAY_OF_MONTH);
 
-                    JSONObject processed = processTimings(context, timings, false);
-                    callback.onSuccess(processed);
-                } else {
-                    // Fallback to offline calculation if API fails
-                    JSONObject offlineTimings = calculateOfflineTimings(context, lat, lon);
-                    JSONObject processed = processTimings(context, offlineTimings, false);
-                    callback.onSuccess(processed);
-                }
-                conn.disconnect();
+                PrayerService.PrayerTimesResult result = calculateToday(context, lat, lon);
+                JSONObject timings = buildTimingsJson(result);
+
+                callback.onSuccess(timings);
             } catch (Exception e) {
                 callback.onError(e);
             }
         }).start();
     }
 
+    /** Formats UTC epoch milliseconds to HH:mm in the device's local time zone. */
+    public static String formatEpochMs(long utcEpochMs) {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.US);
+        sdf.setTimeZone(java.util.TimeZone.getDefault());
+        return sdf.format(utcEpochMs);
+    }
+
+    /**
+     * Single source of truth for the cached prayer JSON shape. The keys must stay capitalized
+     * (Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha) because {@link #processTimings} reads them.
+     */
+    public static JSONObject buildTimingsJson(PrayerService.PrayerTimesResult result) throws Exception {
+        JSONObject timings = new JSONObject();
+        timings.put("Fajr", formatEpochMs(result.getFajrMs()));
+        timings.put("Sunrise", formatEpochMs(result.getSunriseMs()));
+        timings.put("Dhuhr", formatEpochMs(result.getDhuhrMs()));
+        timings.put("Asr", formatEpochMs(result.getAsrMs()));
+        timings.put("Maghrib", formatEpochMs(result.getMaghribMs()));
+        timings.put("Isha", formatEpochMs(result.getIshaMs()));
+        return timings;
+    }
+
+    /**
+     * Calculates today's prayer times for a coordinate pair using the saved calculation method
+     * and Asr juristic setting. Replaces the six hand-rolled copies of this block.
+     */
+    public static PrayerService.PrayerTimesResult calculateToday(Context context, double lat, double lon)
+            throws Exception {
+        SharedPreferences prefs = context.getSharedPreferences("HijriWidgetPrefs", Context.MODE_PRIVATE);
+        PrayerService.CalcMethod method =
+                PrayerService.INSTANCE.fromLegacyIndex(prefs.getInt("prayer_calc_method", 0));
+        com.batoulapps.adhan2.Madhab madhab =
+                (prefs.getInt("prayer_asr_juristic", 0) == 1)
+                        ? com.batoulapps.adhan2.Madhab.HANAFI
+                        : com.batoulapps.adhan2.Madhab.SHAFI;
+
+        Calendar cal = Calendar.getInstance();
+        return PrayerService.INSTANCE.calculate(lat, lon, cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH), method, madhab);
+    }
+
     public static void fetchPrayerTimes(Context context, PrayerCallback callback) {
-        // Overload to use last known location or fallback
-        android.content.SharedPreferences prefs = context.getSharedPreferences("HijriWidgetPrefs",
-                Context.MODE_PRIVATE);
-        float lat = prefs.getFloat("last_lat", 0);
-        float lon = prefs.getFloat("last_lon", 0);
+        float lat = (float) CacheManager.getCacheLat(context);
+        float lon = (float) CacheManager.getCacheLon(context);
 
         if (lat != 0 && lon != 0) {
             fetchPrayerTimes(context, lat, lon, callback);
         } else {
-            // Fallback to offline with default/Riyadh coordinates if none saved
-            try {
-                JSONObject offline = calculateOfflineTimings(context, 24.7136, 46.6753);
-                JSONObject processed = processTimings(context, offline, false);
-                callback.onSuccess(processed);
-            } catch (Exception e) {
-                callback.onError(e);
-            }
+            fetchPrayerTimes(context, DEFAULT_LAT, DEFAULT_LON, callback);
         }
-    }
-
-    public static JSONObject calculateOfflineTimings(Context context, double lat, double lon) throws Exception {
-        android.content.SharedPreferences prefs = context.getSharedPreferences("HijriWidgetPrefs", Context.MODE_PRIVATE);
-        int methodIdx = prefs.getInt("prayer_calc_method", 0);
-        int asrIdx = prefs.getInt("prayer_asr_juristic", 0);
-
-        PrayTime prayers = new PrayTime();
-        prayers.setTimeFormat(prayers.Time24);
-        
-        // Map UI index to PrayTime constants
-        int[] methods = {
-            prayers.Makkah, 
-            prayers.MWL, 
-            prayers.ISNA, 
-            prayers.Egypt, 
-            prayers.Karachi, 
-            prayers.Tehran, 
-            prayers.Jafari
-        };
-        
-        prayers.setCalcMethod(methods[methodIdx]);
-        prayers.setAsrJuristic(asrIdx == 1 ? prayers.Hanafi : prayers.Shafii);
-        prayers.setAdjustHighLats(prayers.MidNight);
-
-        Calendar cal = Calendar.getInstance();
-        double timezone = TimeZone.getDefault().getOffset(cal.getTimeInMillis()) / (1000.0 * 3600.0);
-
-        java.util.ArrayList<String> prayerTimes = prayers.getPrayerTimes(cal, lat, lon, timezone);
-        
-        // PrayTime returns: Fajr, Sunrise, Dhuhr, Asr, Sunset, Maghrib, Isha
-        JSONObject timings = new JSONObject();
-        timings.put("Fajr", prayerTimes.get(0));
-        timings.put("Sunrise", prayerTimes.get(1));
-        timings.put("Dhuhr", prayerTimes.get(2));
-        timings.put("Asr", prayerTimes.get(3));
-        timings.put("Maghrib", prayerTimes.get(5));
-        timings.put("Isha", prayerTimes.get(6));
-        
-        return timings;
-    }
-
-    public static JSONObject getFallbackTimings() throws Exception {
-        JSONObject timings = new JSONObject();
-        timings.put("Fajr", "04:53");
-        timings.put("Sunrise", "06:12");
-        timings.put("Dhuhr", "12:04");
-        timings.put("Asr", "15:29");
-        timings.put("Maghrib", "18:04");
-        timings.put("Isha", "19:34");
-        return timings;
-    }
-
-    public static JSONObject processTimings(JSONObject timings) throws Exception {
-        return processTimings(timings, false, DEFAULT_DIGIT_STYLE);
-    }
-
-    public static JSONObject processTimings(JSONObject timings, boolean showShuruq) throws Exception {
-        return processTimings(timings, showShuruq, DEFAULT_DIGIT_STYLE);
-    }
-
-    public static JSONObject processTimings(Context context, JSONObject timings, boolean showShuruq)
-            throws Exception {
-        return processTimings(timings, showShuruq, getDigitStyle(context));
     }
 
     public static JSONObject processTimings(JSONObject timings, boolean showShuruq, int digitStyle)
@@ -364,14 +400,6 @@ public class PrayerUtils {
         return result;
     }
 
-    public static JSONObject getDynamicTimings(JSONObject storedData) {
-        return getDynamicTimings(storedData, false, DEFAULT_DIGIT_STYLE);
-    }
-
-    public static JSONObject getDynamicTimings(JSONObject storedData, boolean showShuruq) {
-        return getDynamicTimings(storedData, showShuruq, DEFAULT_DIGIT_STYLE);
-    }
-
     public static JSONObject getDynamicTimings(Context context, JSONObject storedData, boolean showShuruq) {
         return getDynamicTimings(storedData, showShuruq, getDigitStyle(context));
     }
@@ -385,14 +413,17 @@ public class PrayerUtils {
             for (String key : keys) {
                 String raw = "";
                 if (times.has(key)) {
-                    JSONObject p = times.optJSONObject(key);
-                    if (p != null) {
+                    Object val = times.get(key);
+                    if (val instanceof JSONObject) {
+                        JSONObject p = (JSONObject) val;
                         if (p.has("raw_time"))
                             raw = p.optString("raw_time", "");
                         else if (p.has("raw"))
                             raw = p.optString("raw", "");
                         else if (p.has("time_24"))
                             raw = p.optString("time_24", "");
+                    } else if (val instanceof String) {
+                        raw = (String) val;
                     }
                 }
                 // Keep an unparsable value as empty so it is skipped instead of
@@ -450,10 +481,6 @@ public class PrayerUtils {
         return (diffMs + 60000L - 1) / 60000L;
     }
 
-    public static String formatTime(String time24, String lang) {
-        return formatTime(time24, lang, DEFAULT_DIGIT_STYLE);
-    }
-
     public static String formatTime(String time24, String lang, int digitStyle) {
         int[] hm = parseTimeOfDay(time24);
         if (hm == null)
@@ -464,10 +491,6 @@ public class PrayerUtils {
             h = 12;
         String res = h + ":" + String.format(Locale.US, "%02d", hm[1]);
         return localize(res, digitStyle);
-    }
-
-    public static String formatDuration(long diffMs, String lang) {
-        return formatDuration(diffMs, lang, DEFAULT_DIGIT_STYLE);
     }
 
     public static String formatDuration(long diffMs, String lang, int digitStyle) {
@@ -484,7 +507,7 @@ public class PrayerUtils {
             else if (m == 0)
                 res = arabicHoursPhrase(h, digitStyle);
             else
-                res = arabicHoursPhrase(h, digitStyle) + " و" + arabicMinutesPhrase(m, digitStyle);
+                res = arabicHoursPhrase(h, digitStyle) + " و " + arabicMinutesPhrase(m, digitStyle);
             return "بقي: " + res;
         } else if (lang.equals("es")) {
             String res = (h == 0) ? (m + " min") : (h + " h y " + m + " min");
@@ -504,10 +527,6 @@ public class PrayerUtils {
         }
     }
 
-    public static String formatDurationOnly(long diffMs, String lang) {
-        return formatDurationOnly(diffMs, lang, DEFAULT_DIGIT_STYLE);
-    }
-
     public static String formatDurationOnly(long diffMs, String lang, int digitStyle) {
         if (diffMs == Long.MAX_VALUE)
             return "--";
@@ -517,7 +536,7 @@ public class PrayerUtils {
 
         if (lang.equals("ar")) {
             return (h == 0) ? (localize(String.valueOf(m), digitStyle) + " د")
-                    : (localize(String.valueOf(h), digitStyle) + " س و"
+                    : (localize(String.valueOf(h), digitStyle) + " س و "
                             + localize(String.valueOf(m), digitStyle) + " د");
         } else if (lang.equals("ja")) {
             return (h == 0) ? (m + "分") : (h + "時" + m + "分");
@@ -563,9 +582,5 @@ public class PrayerUtils {
         } catch (Exception e) {
             return DEFAULT_DIGIT_STYLE;
         }
-    }
-
-    public static String localizeDigits(String input) {
-        return localize(input, DEFAULT_DIGIT_STYLE);
     }
 }

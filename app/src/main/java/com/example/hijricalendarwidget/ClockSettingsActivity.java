@@ -19,7 +19,7 @@ public class ClockSettingsActivity extends AppCompatActivity {
             spinnerDayLanguage;
     private androidx.appcompat.widget.SwitchCompat switchShowClockVis, switchShowHijriVis, switchShowGregVis;
     private androidx.appcompat.widget.SwitchCompat switchShowH, switchShowM, switchArabicAmPm, switchUse24h;
-    private androidx.appcompat.widget.SwitchCompat switchDayPositionLeft, switchDayHorizontal, switchLargeTimeLabels, switchShowTemperature;
+    private androidx.appcompat.widget.SwitchCompat switchDayPositionLeft, switchDayHorizontal, switchLargeTimeLabels, switchShowTemperature, switchShowCityName;
 
     private static final String PREFS_NAME = "HijriWidgetPrefs";
     private String[] languages = { "Auto (تلقائي)", "Arabic (العربية)", "English (الإنجليزية)" };
@@ -97,6 +97,7 @@ public class ClockSettingsActivity extends AppCompatActivity {
         switchDayHorizontal = findViewById(R.id.switch_day_horizontal);
         switchLargeTimeLabels = findViewById(R.id.switch_large_time_labels);
         switchShowTemperature = findViewById(R.id.switch_show_temperature);
+        switchShowCityName = findViewById(R.id.switch_show_city_name);
         spinnerTemperatureInterval = findViewById(R.id.spinner_temperature_interval);
     }
 
@@ -183,6 +184,7 @@ public class ClockSettingsActivity extends AppCompatActivity {
         switchUse24h.setChecked(prefs.getBoolean("use_24h", false));
         switchLargeTimeLabels.setChecked(prefs.getBoolean("large_time_labels", false));
         switchShowTemperature.setChecked(prefs.getBoolean("show_temperature", false));
+        switchShowCityName.setChecked(prefs.getBoolean("show_city_name", true));
 
         int tempIntervalValue = prefs.getInt("temperature_interval", 30);
         for (int i = 0; i < temperatureIntervalValues.length; i++) {
@@ -292,6 +294,7 @@ public class ClockSettingsActivity extends AppCompatActivity {
         editor.putBoolean("use_24h", switchUse24h.isChecked());
         editor.putBoolean("large_time_labels", switchLargeTimeLabels.isChecked());
         editor.putBoolean("show_temperature", switchShowTemperature.isChecked());
+        editor.putBoolean("show_city_name", switchShowCityName.isChecked());
         editor.putInt("temperature_interval", temperatureIntervalValues[spinnerTemperatureInterval.getSelectedItemPosition()]);
 
         int dayMode = spinnerDayLanguage.getSelectedItemPosition();
