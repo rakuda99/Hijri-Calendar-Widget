@@ -580,15 +580,18 @@ class ClockWidget(QWidget):
         date_layout.setSpacing(10)
         self.lbl_hijri_date = QLabel("1448 / 4 / 3 هـ")
         self.lbl_hijri_date.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_hijri_date.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+
         self.lbl_greg_date = QLabel("2026 / 9 / 14 م")
         self.lbl_greg_date.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_greg_date.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         
         date_layout.addWidget(self.lbl_hijri_date)
         date_layout.addWidget(self.lbl_greg_date)
         card_layout.addLayout(date_layout)
 
         main_layout.addWidget(self.card)
-        self.setFixedSize(450, 250)
+        self.setFixedSize(580, 260)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -991,24 +994,35 @@ class AppManager(QObject):
             self.clock_widget.card.setStyleSheet("QFrame#clockCard { background-color: #1c1d1f; border-radius: 12px; }")
             self.prayer_widget.card.setStyleSheet("QFrame#prayerCard { background-color: #1c1d1f; border-radius: 12px; }")
 
-        # Clock Widget Layout
+        # Clock Widget Layout & Typography
         c_color = self.settings_mgr.get("clock_color", "#ffffff")
         c_size_val = self.settings_mgr.get("clock_size", 2)
-        c_px = {1: 48, 2: 72, 3: 96}.get(c_size_val, 72)
-        ampm_px = c_px // 3
+        c_px = {1: 46, 2: 68, 3: 88}.get(c_size_val, 68)
+        ampm_px = max(14, c_px // 3)
         
         self.clock_widget.lbl_clock.setStyleSheet(f"font-size: {c_px}px; font-weight: bold; color: {c_color}; font-family: 'Tajawal';")
         self.clock_widget.lbl_ampm.setStyleSheet(f"font-size: {ampm_px}px; color: {c_color}; font-family: 'Tajawal'; margin-bottom: {c_px//2.5}px;")
 
         h_color = self.settings_mgr.get("hijri_color", "#ffffff")
         h_size_val = self.settings_mgr.get("hijri_size", 2)
-        h_px = {1: 24, 2: 36, 3: 48}.get(h_size_val, 36)
-        self.clock_widget.lbl_hijri_date.setStyleSheet(f"font-size: {h_px}px; font-weight: bold; color: {h_color}; font-family: 'Tajawal';")
+        h_px = {1: 22, 2: 30, 3: 38}.get(h_size_val, 30)
+        self.clock_widget.lbl_hijri_date.setStyleSheet(
+            f"font-size: {h_px}px; font-weight: bold; color: {h_color}; font-family: 'Tajawal'; padding: 0 12px;"
+        )
 
         g_color = self.settings_mgr.get("greg_color", "#ffffff")
         g_size_val = self.settings_mgr.get("greg_size", 2)
-        g_px = {1: 24, 2: 36, 3: 48}.get(g_size_val, 36)
-        self.clock_widget.lbl_greg_date.setStyleSheet(f"font-size: {g_px}px; font-weight: bold; color: {g_color}; font-family: 'Tajawal';")
+        g_px = {1: 22, 2: 30, 3: 38}.get(g_size_val, 30)
+        self.clock_widget.lbl_greg_date.setStyleSheet(
+            f"font-size: {g_px}px; font-weight: bold; color: {g_color}; font-family: 'Tajawal'; padding: 0 12px;"
+        )
+
+        # Dynamic Widget Dimensions to guarantee zero text clipping:
+        # Sizes scale to accommodate the longest month names (e.g. جمادى الآخرة, ذو القعدة, ذو الحجة)
+        max_date_size = max(h_size_val, g_size_val)
+        widget_w = {1: 520, 2: 580, 3: 650}.get(max_date_size, 580)
+        widget_h = {1: 240, 2: 260, 3: 285}.get(max(c_size_val, max_date_size), 260)
+        self.clock_widget.setFixedSize(widget_w, widget_h)
 
         d_color = self.settings_mgr.get("day_color", "#ffffff")
         self.clock_widget.lbl_day.setStyleSheet(f"font-size: {c_px//2.5}px; font-weight: bold; color: {d_color}; font-family: 'Tajawal';")
