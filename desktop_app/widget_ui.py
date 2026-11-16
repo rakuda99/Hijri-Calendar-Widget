@@ -749,6 +749,8 @@ class AppManager(QObject):
         self.prayer_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.prayer_widget.customContextMenuRequested.connect(self.show_context_menu)
 
+        self.current_date = None
+
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_tick)
         self.timer.start(1000)
@@ -908,6 +910,16 @@ class AppManager(QObject):
 
     def update_tick(self):
         now = datetime.datetime.now()
+        today = now.date()
+
+        # Midnight Rollover & Date Change Detection:
+        # If the day changes (e.g. crossing 00:00:00, manual system date/time change, or timezone shift),
+        # recalculate weekday, Gregorian date, Hijri date, and prayer times immediately.
+        if self.current_date != today:
+            self.current_date = today
+            self.update_date_display(today)
+            self.update_prayer_times()
+
         digit_style = self.settings_mgr.get("digit_style", 0)
         time_fmt = self.settings_mgr.get("time_format", False)
         arabic_ampm = self.settings_mgr.get("arabic_ampm", True)
@@ -930,6 +942,45 @@ class AppManager(QObject):
 
         if now.second == 0:
             self.update_prayer_times()
+
+    def update_date_display(self, today=None):
+        if today is None:
+            today = datetime.date.today()
+        self.current_date = today
+
+        offset_days = self.settings_mgr.get("hijri_offset", 0)
+        digit_style = self.settings_mgr.get("digit_style", 0)
+        lang = self.settings_mgr.get("language", "ar")
+        month_format = self.settings_mgr.get("month_format", "num")
+        day_display = self.settings_mgr.get("day_display", "ar")
+
+        formatted = format_full_date(today, offset_days, digit_style, lang)
+        hy, hm, hd, hname = get_hijri_date(today, offset_days, lang)
+        
+        h_sym = " هـ" if self.settings_mgr.get("show_hijri_symbol", True) else ""
+        g_sym = " م" if self.settings_mgr.get("show_greg_symbol", True) else ""
+
+        if month_format == "name":
+            if lang == "ar":
+                m_greg = GREGORIAN_MONTH_NAMES_AR[today.month - 1]
+            else:
+                m_greg = GREGORIAN_MONTH_NAMES_EN[today.month - 1]
+            hijri_str = f"{hd} {hname} {hy}{h_sym}"
+            greg_str = f"{today.day} {m_greg} {today.year}{g_sym}"
+        else:
+            hijri_str = f"{hy} / {hm} / {hd}{h_sym}"
+            greg_str = f"{today.year} / {today.month} / {today.day}{g_sym}"
+        
+        self.clock_widget.lbl_hijri_date.setText(localize_digits(hijri_str, digit_style))
+        self.clock_widget.lbl_greg_date.setText(localize_digits(greg_str, digit_style))
+        
+        if day_display == "ar":
+            self.clock_widget.lbl_day.setText(ARABIC_DAYS_NAMES[today.weekday()])
+        else:
+            self.clock_widget.lbl_day.setText(today.strftime('%A'))
+
+        if hasattr(self, 'tray_icon') and self.tray_icon:
+            self.tray_icon.setToolTip(f"{formatted['day_name']} - {formatted['hijri_formatted']}")
 
     def update_all(self):
         bg_style = self.settings_mgr.get("background_style", "transparent")
@@ -989,29 +1040,8 @@ class AppManager(QObject):
             self.clock_widget.top_layout.addStretch()
             self.clock_widget.top_layout.addLayout(self.clock_widget.right_layout)
 
-        today = datetime.date.today()
-        offset_days = self.settings_mgr.get("hijri_offset", 0)
-        digit_style = self.settings_mgr.get("digit_style", 0)
-        lang = self.settings_mgr.get("language", "ar")
-        month_format = self.settings_mgr.get("month_format", "num")
-        day_display = self.settings_mgr.get("day_display", "ar")
-
-        formatted = format_full_date(today, offset_days, digit_style, lang)
-        hy, hm, hd, hname = get_hijri_date(today, offset_days)
-        
-        h_sym = " هـ" if self.settings_mgr.get("show_hijri_symbol", True) else ""
-        hijri_str = f"{hy} / {hm} / {hd}{h_sym}"
-            
-        g_sym = " م" if self.settings_mgr.get("show_greg_symbol", True) else ""
-        greg_str = f"{today.year} / {today.month} / {today.day}{g_sym}"
-        
-        self.clock_widget.lbl_hijri_date.setText(localize_digits(hijri_str, digit_style))
-        self.clock_widget.lbl_greg_date.setText(localize_digits(greg_str, digit_style))
-        
-        if day_display == "ar": self.clock_widget.lbl_day.setText(ARABIC_DAYS_NAMES[today.weekday()])
-        else: self.clock_widget.lbl_day.setText(today.strftime('%A'))
-
-        self.tray_icon.setToolTip(f"{formatted['day_name']} - {formatted['hijri_formatted']}")
+        # Refresh all date-dependent labels
+        self.update_date_display(datetime.date.today())
         self.update_tick()
         self.update_prayer_times()
 
