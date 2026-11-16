@@ -9,6 +9,7 @@ import os
 import datetime
 import urllib.request
 import json
+import winsound
 from PyQt6.QtCore import Qt, QPoint, QTimer, QSize, QDate, QObject, QThread, pyqtSignal
 from PyQt6.QtGui import (
     QFont, QIcon, QColor, QFontDatabase, QAction, QPainter,
@@ -28,11 +29,38 @@ def send_to_desktop_bottom(hwnd):
         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE
     )
 
+def flash_window(hwnd):
+    """وميض نافذة التطبيق لجذب انتباه المستخدم عند اكتمال المؤقت"""
+    try:
+        class FLASHWINFO(ctypes.Structure):
+            _fields_ = [
+                ('cbSize', wintypes.UINT),
+                ('hwnd', wintypes.HWND),
+                ('dwFlags', wintypes.DWORD),
+                ('uCount', wintypes.UINT),
+                ('dwTimeout', wintypes.DWORD)
+            ]
+        FLASHW_ALL = 3
+        FLASHW_TIMERNOFG = 12
+        finfo = FLASHWINFO(
+            cbSize=ctypes.sizeof(FLASHWINFO),
+            hwnd=wintypes.HWND(int(hwnd)),
+            dwFlags=FLASHW_ALL | FLASHW_TIMERNOFG,
+            uCount=5,
+            dwTimeout=0
+        )
+        ctypes.windll.user32.FlashWindowEx(ctypes.byref(finfo))
+    except Exception:
+        try:
+            ctypes.windll.user32.FlashWindow(int(hwnd), True)
+        except Exception:
+            pass
+
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QFrame, QGridLayout, QDialog, QComboBox, QSpinBox,
     QCheckBox, QSlider, QSystemTrayIcon, QScrollArea, QMenu, QMessageBox,
-    QGraphicsDropShadowEffect, QSizePolicy, QSpacerItem
+    QGraphicsDropShadowEffect, QSizePolicy, QSpacerItem, QApplication
 )
 
 from .hijri_engine import (
@@ -505,6 +533,467 @@ class MonthCalendarDialog(QDialog):
                 curr_row += 1
 
 
+class TimerManager(QObject):
+    """مدير مؤقت العد التنازلي الموحد (Unified Countdown Timer Manager)"""
+    tick = pyqtSignal(int, str)         # remaining_seconds, "HH:MM:SS"
+    finished = pyqtSignal()
+    state_changed = pyqtSignal(str)     # "idle", "running", "paused", "finished"
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.total_seconds = 0
+        self.remaining_seconds = 0
+        self.state = "idle"  # "idle", "running", "paused", "finished"
+
+        self.qtimer = QTimer(self)
+        self.qtimer.setInterval(1000)
+        self.qtimer.timeout.connect(self._on_tick)
+
+    def start(self, hours=0, minutes=0, seconds=0):
+        # Resume if paused and no new duration passed
+        if self.state == "paused" and hours == 0 and minutes == 0 and seconds == 0:
+            if self.remaining_seconds > 0:
+                self.state = "running"
+                self.qtimer.start(1000)
+                self.state_changed.emit(self.state)
+                return
+
+        new_total = hours * 3600 + minutes * 60 + seconds
+        if new_total <= 0:
+            return
+
+        self.total_seconds = new_total
+        self.remaining_seconds = new_total
+        self.state = "running"
+        self.state_changed.emit(self.state)
+        self.tick.emit(self.remaining_seconds, self.format_time(self.remaining_seconds))
+        self.qtimer.start(1000)
+
+    def pause(self):
+        if self.state == "running":
+            self.qtimer.stop()
+            self.state = "paused"
+            self.state_changed.emit(self.state)
+
+    def resume(self):
+        if self.state == "paused" and self.remaining_seconds > 0:
+            self.state = "running"
+            self.qtimer.start(1000)
+            self.state_changed.emit(self.state)
+
+    def stop(self):
+        self.qtimer.stop()
+        self.state = "idle"
+        self.remaining_seconds = 0
+        self.state_changed.emit(self.state)
+        self.tick.emit(0, "00:00:00")
+
+    def reset(self):
+        self.qtimer.stop()
+        self.remaining_seconds = self.total_seconds
+        self.state = "idle"
+        self.state_changed.emit(self.state)
+        self.tick.emit(self.remaining_seconds, self.format_time(self.remaining_seconds))
+
+    def _on_tick(self):
+        if self.remaining_seconds > 0:
+            self.remaining_seconds -= 1
+            self.tick.emit(self.remaining_seconds, self.format_time(self.remaining_seconds))
+            if self.remaining_seconds <= 0:
+                self.qtimer.stop()
+                self.state = "finished"
+                self.state_changed.emit(self.state)
+                self.finished.emit()
+
+    @staticmethod
+    def format_time(total_secs):
+        h = max(0, total_secs) // 3600
+        m = (max(0, total_secs) % 3600) // 60
+        s = max(0, total_secs) % 60
+        return f"{h:02d}:{m:02d}:{s:02d}"
+
+
+class TimerDialog(QDialog):
+    def __init__(self, timer_mgr, settings_mgr, parent=None):
+        super().__init__(parent)
+        self.timer_mgr = timer_mgr
+        self.settings_mgr = settings_mgr
+        self.setWindowTitle("مؤقت العد التنازلي | Countdown Timer")
+        self.setFixedSize(390, 480)
+        self.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+
+        self.setStyleSheet("""
+            QDialog {
+                background-color: #1a2233;
+                color: #e2e8f0;
+                font-family: 'Tajawal', sans-serif;
+            }
+            QLabel {
+                color: #cbd5e1;
+                font-size: 14px;
+            }
+            QSpinBox {
+                background-color: #242d3d;
+                border: 1px solid #334155;
+                border-radius: 8px;
+                color: #ffffff;
+                padding: 6px 8px;
+                font-size: 15px;
+                font-weight: bold;
+            }
+            QSpinBox:focus {
+                border-color: #f59e0b;
+            }
+            QSpinBox::up-button, QSpinBox::down-button {
+                width: 18px;
+                background-color: #334155;
+                border-radius: 4px;
+                margin: 2px;
+            }
+            QSpinBox::up-button:hover, QSpinBox::down-button:hover {
+                background-color: #f59e0b;
+            }
+        """)
+
+        self.init_ui()
+        self.connect_signals()
+        self.sync_with_timer_state()
+
+    def init_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 20, 24, 20)
+        layout.setSpacing(14)
+
+        # Header
+        lbl_title = QLabel("⏰  مؤقت العد التنازلي | Countdown Timer")
+        lbl_title.setStyleSheet("font-size: 17px; font-weight: bold; color: #f59e0b;")
+        lbl_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(lbl_title)
+
+        # Display Card
+        self.display_card = QFrame()
+        self.display_card.setStyleSheet("""
+            QFrame {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #0f172a, stop:1 #1e293b);
+                border: 1px solid rgba(245, 158, 11, 0.35);
+                border-radius: 12px;
+            }
+        """)
+        card_vbox = QVBoxLayout(self.display_card)
+        card_vbox.setContentsMargins(12, 14, 12, 14)
+        card_vbox.setSpacing(4)
+
+        self.lbl_display = QLabel("00:15:00")
+        self.lbl_display.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_display.setStyleSheet("font-size: 42px; font-weight: bold; color: #f59e0b; font-family: 'Consolas', 'Courier New', monospace; border: none; background: transparent;")
+        card_vbox.addWidget(self.lbl_display)
+
+        self.lbl_status = QLabel("جاهز للبدء | Ready")
+        self.lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_status.setStyleSheet("font-size: 12px; color: #94a3b8; border: none; background: transparent;")
+        card_vbox.addWidget(self.lbl_status)
+
+        layout.addWidget(self.display_card)
+
+        # Presets Label & Chips
+        lbl_presets = QLabel("فترات سريعة / Quick Presets:")
+        lbl_presets.setStyleSheet("font-weight: bold; font-size: 13px; color: #e2e8f0;")
+        layout.addWidget(lbl_presets)
+
+        presets_layout = QHBoxLayout()
+        presets_layout.setSpacing(6)
+        presets = [
+            ("5 د", 0, 5),
+            ("15 د", 0, 15),
+            ("25 د", 0, 25),
+            ("30 د", 0, 30),
+            ("1 س", 1, 0)
+        ]
+        for text, ph, pm in presets:
+            btn_p = QPushButton(text)
+            btn_p.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn_p.setStyleSheet("""
+                QPushButton {
+                    background-color: #242d3d;
+                    color: #cbd5e1;
+                    border: 1px solid #334155;
+                    border-radius: 6px;
+                    padding: 5px 6px;
+                    font-size: 12px;
+                }
+                QPushButton:hover {
+                    background-color: rgba(245, 158, 11, 0.25);
+                    border-color: #f59e0b;
+                    color: #f6c845;
+                }
+            """)
+            btn_p.clicked.connect(lambda checked, h=ph, m=pm: self.apply_preset(h, m))
+            presets_layout.addWidget(btn_p)
+        layout.addLayout(presets_layout)
+
+        # Inputs Grid
+        lbl_inputs = QLabel("تحديد المدة / Custom Duration:")
+        lbl_inputs.setStyleSheet("font-weight: bold; font-size: 13px; color: #e2e8f0;")
+        layout.addWidget(lbl_inputs)
+
+        inputs_layout = QHBoxLayout()
+        inputs_layout.setSpacing(10)
+
+        # Hours
+        vbox_h = QVBoxLayout()
+        lbl_h = QLabel("ساعات (Hours)")
+        lbl_h.setStyleSheet("font-size: 12px; color: #94a3b8;")
+        self.spn_hours = QSpinBox()
+        self.spn_hours.setRange(0, 23)
+        self.spn_hours.setValue(0)
+        self.spn_hours.setSuffix(" س")
+        vbox_h.addWidget(lbl_h)
+        vbox_h.addWidget(self.spn_hours)
+        inputs_layout.addLayout(vbox_h)
+
+        # Minutes
+        vbox_m = QVBoxLayout()
+        lbl_m = QLabel("دقائق (Minutes)")
+        lbl_m.setStyleSheet("font-size: 12px; color: #94a3b8;")
+        self.spn_minutes = QSpinBox()
+        self.spn_minutes.setRange(0, 59)
+        self.spn_minutes.setValue(15)
+        self.spn_minutes.setSuffix(" د")
+        vbox_m.addWidget(lbl_m)
+        vbox_m.addWidget(self.spn_minutes)
+        inputs_layout.addLayout(vbox_m)
+
+        # Seconds
+        vbox_s = QVBoxLayout()
+        lbl_s = QLabel("ثواني (Seconds)")
+        lbl_s.setStyleSheet("font-size: 12px; color: #94a3b8;")
+        self.spn_seconds = QSpinBox()
+        self.spn_seconds.setRange(0, 59)
+        self.spn_seconds.setValue(0)
+        self.spn_seconds.setSuffix(" ث")
+        vbox_s.addWidget(lbl_s)
+        vbox_s.addWidget(self.spn_seconds)
+        inputs_layout.addLayout(vbox_s)
+
+        layout.addLayout(inputs_layout)
+
+        # Action Buttons
+        actions_grid = QGridLayout()
+        actions_grid.setSpacing(10)
+
+        self.btn_start = QPushButton("▶  ابدأ المؤقت | Start")
+        self.btn_start.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_start.setStyleSheet("""
+            QPushButton {
+                background-color: #10b981;
+                color: #ffffff;
+                font-weight: bold;
+                font-size: 14px;
+                border-radius: 8px;
+                padding: 9px 12px;
+            }
+            QPushButton:hover { background-color: #059669; }
+            QPushButton:disabled { background-color: #334155; color: #64748b; }
+        """)
+
+        self.btn_pause = QPushButton("⏸  إيقاف مؤقت | Pause")
+        self.btn_pause.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_pause.setStyleSheet("""
+            QPushButton {
+                background-color: #f59e0b;
+                color: #ffffff;
+                font-weight: bold;
+                font-size: 14px;
+                border-radius: 8px;
+                padding: 9px 12px;
+            }
+            QPushButton:hover { background-color: #d97706; }
+            QPushButton:disabled { background-color: #334155; color: #64748b; }
+        """)
+
+        self.btn_stop = QPushButton("⏹  إيقاف | Stop")
+        self.btn_stop.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_stop.setStyleSheet("""
+            QPushButton {
+                background-color: #ef4444;
+                color: #ffffff;
+                font-weight: bold;
+                font-size: 14px;
+                border-radius: 8px;
+                padding: 9px 12px;
+            }
+            QPushButton:hover { background-color: #dc2626; }
+            QPushButton:disabled { background-color: #334155; color: #64748b; }
+        """)
+
+        self.btn_reset = QPushButton("🔄  إعادة ضبط | Reset")
+        self.btn_reset.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_reset.setStyleSheet("""
+            QPushButton {
+                background-color: #475569;
+                color: #ffffff;
+                font-weight: bold;
+                font-size: 14px;
+                border-radius: 8px;
+                padding: 9px 12px;
+            }
+            QPushButton:hover { background-color: #64748b; }
+            QPushButton:disabled { background-color: #334155; color: #64748b; }
+        """)
+
+        actions_grid.addWidget(self.btn_start, 0, 0)
+        actions_grid.addWidget(self.btn_pause, 0, 1)
+        actions_grid.addWidget(self.btn_stop, 1, 0)
+        actions_grid.addWidget(self.btn_reset, 1, 1)
+
+        layout.addLayout(actions_grid)
+
+        # Footer Hint
+        lbl_hint = QLabel("💡 يستمر المؤقت بالعمل في الخلفية حتى بعد إغلاق هذه النافذة")
+        lbl_hint.setStyleSheet("font-size: 11px; color: #94a3b8;")
+        lbl_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(lbl_hint)
+
+        # Close Window Button
+        btn_close = QPushButton("إغلاق النافذة")
+        btn_close.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_close.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                border: 1px solid #334155;
+                color: #94a3b8;
+                border-radius: 6px;
+                padding: 6px;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #242d3d;
+                color: #ffffff;
+            }
+        """)
+        btn_close.clicked.connect(self.hide)
+        layout.addWidget(btn_close)
+
+    def connect_signals(self):
+        self.timer_mgr.tick.connect(self.on_tick)
+        self.timer_mgr.state_changed.connect(self.on_state_changed)
+        self.timer_mgr.finished.connect(self.on_finished)
+
+        self.btn_start.clicked.connect(self.start_timer)
+        self.btn_pause.clicked.connect(self.toggle_pause)
+        self.btn_stop.clicked.connect(self.stop_timer)
+        self.btn_reset.clicked.connect(self.reset_timer)
+
+        self.spn_hours.valueChanged.connect(self.on_inputs_changed)
+        self.spn_minutes.valueChanged.connect(self.on_inputs_changed)
+        self.spn_seconds.valueChanged.connect(self.on_inputs_changed)
+
+    def apply_preset(self, h, m):
+        if self.timer_mgr.state in ("running", "paused"):
+            return
+        self.spn_hours.setValue(h)
+        self.spn_minutes.setValue(m)
+        self.spn_seconds.setValue(0)
+        self.on_inputs_changed()
+
+    def on_inputs_changed(self):
+        if self.timer_mgr.state == "idle":
+            h = self.spn_hours.value()
+            m = self.spn_minutes.value()
+            s = self.spn_seconds.value()
+            total = h * 3600 + m * 60 + s
+            digit_style = self.settings_mgr.get("digit_style", 0)
+            formatted = self.timer_mgr.format_time(total)
+            self.lbl_display.setText(localize_digits(formatted, digit_style))
+            self.lbl_status.setText("جاهز للبدء | Ready")
+
+    def start_timer(self):
+        h = self.spn_hours.value()
+        m = self.spn_minutes.value()
+        s = self.spn_seconds.value()
+        if h == 0 and m == 0 and s == 0:
+            return
+        self.timer_mgr.start(h, m, s)
+
+    def toggle_pause(self):
+        if self.timer_mgr.state == "running":
+            self.timer_mgr.pause()
+        elif self.timer_mgr.state == "paused":
+            self.timer_mgr.resume()
+
+    def stop_timer(self):
+        self.timer_mgr.stop()
+        self.on_inputs_changed()
+
+    def reset_timer(self):
+        self.timer_mgr.reset()
+        self.on_inputs_changed()
+
+    def on_tick(self, remaining_secs, time_str):
+        digit_style = self.settings_mgr.get("digit_style", 0)
+        self.lbl_display.setText(localize_digits(time_str, digit_style))
+
+    def on_state_changed(self, state):
+        self.sync_with_timer_state()
+
+    def on_finished(self):
+        self.sync_with_timer_state()
+
+    def sync_with_timer_state(self):
+        state = self.timer_mgr.state
+        digit_style = self.settings_mgr.get("digit_style", 0)
+
+        if state == "running":
+            formatted = self.timer_mgr.format_time(self.timer_mgr.remaining_seconds)
+            self.lbl_display.setText(localize_digits(formatted, digit_style))
+            self.lbl_display.setStyleSheet("font-size: 42px; font-weight: bold; color: #10b981; font-family: 'Consolas', 'Courier New', monospace; border: none; background: transparent;")
+            self.lbl_status.setText("المؤقت قيد التشغيل ⏳ | Running...")
+            self.btn_start.setEnabled(False)
+            self.btn_pause.setEnabled(True)
+            self.btn_pause.setText("⏸  إيقاف مؤقت | Pause")
+            self.btn_stop.setEnabled(True)
+            self.btn_reset.setEnabled(False)
+            self.spn_hours.setEnabled(False)
+            self.spn_minutes.setEnabled(False)
+            self.spn_seconds.setEnabled(False)
+        elif state == "paused":
+            formatted = self.timer_mgr.format_time(self.timer_mgr.remaining_seconds)
+            self.lbl_display.setText(localize_digits(formatted, digit_style))
+            self.lbl_display.setStyleSheet("font-size: 42px; font-weight: bold; color: #f59e0b; font-family: 'Consolas', 'Courier New', monospace; border: none; background: transparent;")
+            self.lbl_status.setText("المؤقت متوقف مؤقتاً ⏸ | Paused")
+            self.btn_start.setEnabled(False)
+            self.btn_pause.setEnabled(True)
+            self.btn_pause.setText("▶  استئناف | Resume")
+            self.btn_stop.setEnabled(True)
+            self.btn_reset.setEnabled(True)
+            self.spn_hours.setEnabled(False)
+            self.spn_minutes.setEnabled(False)
+            self.spn_seconds.setEnabled(False)
+        elif state == "finished":
+            self.lbl_display.setText("00:00:00")
+            self.lbl_display.setStyleSheet("font-size: 42px; font-weight: bold; color: #ef4444; font-family: 'Consolas', 'Courier New', monospace; border: none; background: transparent;")
+            self.lbl_status.setText("🔔 انتهى الوقت! | Timer Finished")
+            self.btn_start.setEnabled(True)
+            self.btn_pause.setEnabled(False)
+            self.btn_pause.setText("⏸  إيقاف مؤقت | Pause")
+            self.btn_stop.setEnabled(False)
+            self.btn_reset.setEnabled(True)
+            self.spn_hours.setEnabled(True)
+            self.spn_minutes.setEnabled(True)
+            self.spn_seconds.setEnabled(True)
+        else: # idle
+            self.on_inputs_changed()
+            self.lbl_display.setStyleSheet("font-size: 42px; font-weight: bold; color: #f59e0b; font-family: 'Consolas', 'Courier New', monospace; border: none; background: transparent;")
+            self.btn_start.setEnabled(True)
+            self.btn_pause.setEnabled(False)
+            self.btn_pause.setText("⏸  إيقاف مؤقت | Pause")
+            self.btn_stop.setEnabled(False)
+            self.btn_reset.setEnabled(True)
+            self.spn_hours.setEnabled(True)
+            self.spn_minutes.setEnabled(True)
+            self.spn_seconds.setEnabled(True)
+
+
 
 
 
@@ -558,15 +1047,37 @@ class ClockWidget(QWidget):
         self.left_layout.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignLeft)
 
         self.right_layout = QHBoxLayout()
-        self.right_layout.setSpacing(4)
+        self.right_layout.setSpacing(6)
         
         self.lbl_clock = QLabel("6:07")
         self.lbl_clock.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
         self.lbl_ampm = QLabel("PM")
         self.lbl_ampm.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
+        self.btn_timer = QPushButton("⏰")
+        self.btn_timer.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_timer.setToolTip("مؤقت العد التنازلي (انقر لضبط المؤقت)")
+        self.btn_timer.setObjectName("btnTimer")
+        self.btn_timer.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.08);
+                color: #cbd5e1;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 12px;
+                padding: 3px 8px;
+                font-size: 13px;
+                font-family: 'Tajawal', sans-serif;
+            }
+            QPushButton:hover {
+                background-color: rgba(245, 158, 11, 0.25);
+                border-color: #f59e0b;
+                color: #f6c845;
+            }
+        """)
+
         self.right_layout.addWidget(self.lbl_clock)
         self.right_layout.addWidget(self.lbl_ampm)
+        self.right_layout.addWidget(self.btn_timer, 0, Qt.AlignmentFlag.AlignVCenter)
         self.right_layout.setAlignment(Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
 
         self.top_layout.addLayout(self.left_layout)
@@ -616,8 +1127,10 @@ class ClockWidget(QWidget):
         if px >= 0 and py >= 0:
             self.move(px, py)
         else:
-            screen = self.screen().geometry()
-            self.move(screen.width() - self.width() - 40, 60)
+            scr = self.screen() or QApplication.primaryScreen()
+            if scr:
+                screen = scr.geometry()
+                self.move(screen.width() - self.width() - 40, 60)
 
     def save_position(self):
         self.settings_mgr.set("pos_x", self.x())
@@ -719,8 +1232,10 @@ class PrayerWidget(QWidget):
         if px >= 0 and py >= 0:
             self.move(px, py)
         else:
-            screen = self.screen().geometry()
-            self.move(screen.width() - self.width() - 40, 320)
+            scr = self.screen() or QApplication.primaryScreen()
+            if scr:
+                screen = scr.geometry()
+                self.move(screen.width() - self.width() - 40, 320)
 
     def save_position(self):
         self.settings_mgr.set("prayer_pos_x", self.x())
@@ -742,6 +1257,14 @@ class AppManager(QObject):
 
         self.weather_worker = None
         self.clock_widget.lbl_temp.mousePressEvent = lambda e: self.fetch_weather(force=True)
+
+        self.timer_mgr = TimerManager(self)
+        self.timer_mgr.tick.connect(self.on_timer_tick)
+        self.timer_mgr.state_changed.connect(self.on_timer_state_changed)
+        self.timer_mgr.finished.connect(self.on_timer_finished)
+        self.timer_dialog = None
+
+        self.clock_widget.btn_timer.clicked.connect(self.show_timer_dialog)
 
         self.init_tray()
         
@@ -807,6 +1330,10 @@ class AppManager(QObject):
         act_calendar.triggered.connect(self.show_month_calendar)
         tray_menu.addAction(act_calendar)
 
+        act_timer = QAction("⏰ مؤقت العد التنازلي", self)
+        act_timer.triggered.connect(self.show_timer_dialog)
+        tray_menu.addAction(act_timer)
+
         act_settings = QAction("⚙️ الإعدادات", self)
         act_settings.triggered.connect(self.show_settings)
         tray_menu.addAction(act_settings)
@@ -838,6 +1365,10 @@ class AppManager(QObject):
         act_calendar = QAction("📅  تقويم الشهر", self)
         act_calendar.triggered.connect(self.show_month_calendar)
         menu.addAction(act_calendar)
+
+        act_timer = QAction("⏰  مؤقت العد التنازلي", self)
+        act_timer.triggered.connect(self.show_timer_dialog)
+        menu.addAction(act_timer)
 
         act_settings = QAction("⚙️  الإعدادات", self)
         act_settings.triggered.connect(self.show_settings)
@@ -910,6 +1441,132 @@ class AppManager(QObject):
     def show_month_calendar(self):
         dlg = MonthCalendarDialog(self.settings_mgr, self.clock_widget)
         dlg.exec()
+
+    def show_timer_dialog(self):
+        if not hasattr(self, 'timer_dialog') or self.timer_dialog is None:
+            self.timer_dialog = TimerDialog(self.timer_mgr, self.settings_mgr, self.clock_widget)
+        self.timer_dialog.show()
+        self.timer_dialog.raise_()
+        self.timer_dialog.activateWindow()
+
+    def on_timer_tick(self, remaining_secs, time_str):
+        digit_style = self.settings_mgr.get("digit_style", 0)
+        localized_str = localize_digits(time_str, digit_style)
+        self.clock_widget.btn_timer.setText(f"⏰ {localized_str}")
+        self.clock_widget.btn_timer.setToolTip(f"المؤقت قيد التشغيل: {localized_str}\nانقر لإدارة المؤقت")
+
+    def on_timer_state_changed(self, state):
+        digit_style = self.settings_mgr.get("digit_style", 0)
+        if state == "idle":
+            self.clock_widget.btn_timer.setText("⏰")
+            self.clock_widget.btn_timer.setToolTip("مؤقت العد التنازلي (انقر لضبط المؤقت)")
+            self.clock_widget.btn_timer.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(255, 255, 255, 0.08);
+                    color: #cbd5e1;
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    border-radius: 12px;
+                    padding: 3px 8px;
+                    font-size: 13px;
+                    font-family: 'Tajawal', sans-serif;
+                }
+                QPushButton:hover {
+                    background-color: rgba(245, 158, 11, 0.25);
+                    border-color: #f59e0b;
+                    color: #f6c845;
+                }
+            """)
+        elif state == "running":
+            formatted = self.timer_mgr.format_time(self.timer_mgr.remaining_seconds)
+            localized_str = localize_digits(formatted, digit_style)
+            self.clock_widget.btn_timer.setText(f"⏰ {localized_str}")
+            self.clock_widget.btn_timer.setToolTip(f"المؤقت قيد التشغيل: {localized_str}\nانقر للإدارة")
+            self.clock_widget.btn_timer.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(245, 158, 11, 0.25);
+                    color: #fbbf24;
+                    border: 1px solid #f59e0b;
+                    border-radius: 12px;
+                    padding: 3px 10px;
+                    font-size: 13px;
+                    font-weight: bold;
+                    font-family: 'Consolas', 'Tajawal', sans-serif;
+                }
+                QPushButton:hover {
+                    background-color: rgba(245, 158, 11, 0.4);
+                    color: #fef08a;
+                }
+            """)
+        elif state == "paused":
+            formatted = self.timer_mgr.format_time(self.timer_mgr.remaining_seconds)
+            localized_str = localize_digits(formatted, digit_style)
+            self.clock_widget.btn_timer.setText(f"⏸ {localized_str}")
+            self.clock_widget.btn_timer.setToolTip(f"المؤقت متوقف مؤقتاً: {localized_str}\nانقر للاستئناف")
+            self.clock_widget.btn_timer.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(148, 163, 184, 0.2);
+                    color: #94a3b8;
+                    border: 1px solid #64748b;
+                    border-radius: 12px;
+                    padding: 3px 10px;
+                    font-size: 13px;
+                    font-weight: bold;
+                    font-family: 'Consolas', 'Tajawal', sans-serif;
+                }
+                QPushButton:hover {
+                    background-color: rgba(148, 163, 184, 0.35);
+                    color: #cbd5e1;
+                }
+            """)
+        elif state == "finished":
+            self.clock_widget.btn_timer.setText("⏰ 00:00:00")
+            self.clock_widget.btn_timer.setToolTip("انتهى المؤقت! انقر لإعادة الضبط")
+            self.clock_widget.btn_timer.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(239, 68, 68, 0.3);
+                    color: #f87171;
+                    border: 1px solid #ef4444;
+                    border-radius: 12px;
+                    padding: 3px 10px;
+                    font-size: 13px;
+                    font-weight: bold;
+                    font-family: 'Consolas', 'Tajawal', sans-serif;
+                }
+                QPushButton:hover {
+                    background-color: rgba(239, 68, 68, 0.45);
+                    color: #ffffff;
+                }
+            """)
+
+    def on_timer_finished(self):
+        # 1. Play sound
+        try:
+            winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS | winsound.SND_ASYNC)
+        except Exception:
+            try:
+                winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+            except Exception:
+                QApplication.beep()
+
+        # 2. Desktop notification
+        if hasattr(self, 'tray_icon') and self.tray_icon:
+            self.tray_icon.showMessage(
+                "انتهى المؤقت / Timer Finished",
+                "⏰ حان الوقت المحدد للمؤقت!",
+                QSystemTrayIcon.MessageIcon.Information,
+                12000
+            )
+
+        # 3. Flash application window & bring forward
+        self.clock_widget.show()
+        self.clock_widget.raise_()
+        self.clock_widget.activateWindow()
+        flash_window(self.clock_widget.winId())
+
+        if hasattr(self, 'timer_dialog') and self.timer_dialog and self.timer_dialog.isVisible():
+            self.timer_dialog.raise_()
+            self.timer_dialog.activateWindow()
+            flash_window(self.timer_dialog.winId())
 
     def update_tick(self):
         now = datetime.datetime.now()
@@ -1005,23 +1662,24 @@ class AppManager(QObject):
 
         h_color = self.settings_mgr.get("hijri_color", "#ffffff")
         h_size_val = self.settings_mgr.get("hijri_size", 2)
-        h_px = {1: 22, 2: 30, 3: 38}.get(h_size_val, 30)
+        h_px = {1: 20, 2: 26, 3: 32}.get(h_size_val, 26)
         self.clock_widget.lbl_hijri_date.setStyleSheet(
-            f"font-size: {h_px}px; font-weight: bold; color: {h_color}; font-family: 'Tajawal'; padding: 0 12px;"
+            f"font-size: {h_px}px; font-weight: bold; color: {h_color}; font-family: 'Tajawal'; padding: 0 16px;"
         )
 
         g_color = self.settings_mgr.get("greg_color", "#ffffff")
         g_size_val = self.settings_mgr.get("greg_size", 2)
-        g_px = {1: 22, 2: 30, 3: 38}.get(g_size_val, 30)
+        g_px = {1: 20, 2: 26, 3: 32}.get(g_size_val, 26)
         self.clock_widget.lbl_greg_date.setStyleSheet(
-            f"font-size: {g_px}px; font-weight: bold; color: {g_color}; font-family: 'Tajawal'; padding: 0 12px;"
+            f"font-size: {g_px}px; font-weight: bold; color: {g_color}; font-family: 'Tajawal'; padding: 0 16px;"
         )
 
         # Dynamic Widget Dimensions to guarantee zero text clipping:
-        # Sizes scale to accommodate the longest month names (e.g. جمادى الآخرة, ذو القعدة, ذو الحجة)
+        # Sizes are mathematically calibrated to accommodate the longest month names
+        # (e.g. جمادى الآخرة, ذو القعدة, ذو الحجة, Jumada al-Thani)
         max_date_size = max(h_size_val, g_size_val)
-        widget_w = {1: 520, 2: 580, 3: 650}.get(max_date_size, 580)
-        widget_h = {1: 240, 2: 260, 3: 285}.get(max(c_size_val, max_date_size), 260)
+        widget_w = {1: 520, 2: 580, 3: 660}.get(max_date_size, 580)
+        widget_h = {1: 235, 2: 255, 3: 280}.get(max(c_size_val, max_date_size), 255)
         self.clock_widget.setFixedSize(widget_w, widget_h)
 
         d_color = self.settings_mgr.get("day_color", "#ffffff")
